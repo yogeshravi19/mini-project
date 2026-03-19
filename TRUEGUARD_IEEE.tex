@@ -1,0 +1,420 @@
+%% TRUEGUARD - IEEE Review/Survey Paper
+%% Based on bare_jrnl.tex V1.4b by Michael Shell
+
+\documentclass[journal]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\ifCLASSINFOpdf
+  \usepackage[pdftex]{graphicx}
+\else
+  \usepackage[dvips]{graphicx}
+\fi
+
+\hyphenation{op-tical net-works semi-conduc-tor hallucination}
+
+\begin{document}
+
+\title{Toward Trustworthy Large Language Models: A Comprehensive Review of Hallucination Detection, Explainability, and Mitigation Strategies}
+
+\author{Author~Name,
+        Author~Name,
+        and~Author~Name%
+\thanks{Manuscript received February 2026.}%
+\thanks{The authors are with the Department of Computer Science, Institution Name, City, Country. E-mail: author@institution.edu}}
+
+\markboth{IEEE Transactions on Artificial Intelligence, 2026}%
+{Author \MakeLowercase{\textit{et al.}}: Toward Trustworthy LLMs: A Review of Hallucination Detection, Explainability, and Mitigation}
+
+\maketitle
+
+% =====================================================================
+% ABSTRACT
+% =====================================================================
+\begin{abstract}
+Large Language Models (LLMs) have achieved unprecedented capabilities across natural language processing tasks, yet their deployment in safety-critical domains remains fundamentally impeded by the phenomenon of hallucination---the generation of fluent but factually incorrect outputs. A rapidly growing body of research has emerged to address this challenge through diverse and complementary approaches, including internal state analysis, uncertainty quantification, attention-based monitoring, distribution shift detection, retrieval-augmented generation, reinforcement learning-based calibration, and human-centered explainability. However, these research directions have developed largely in isolation, with limited cross-pollination of ideas and no unified perspective on how they complement one another. This paper presents a comprehensive review of twenty recent and influential works on hallucination detection, mitigation, and trustworthiness in LLMs. We organize the literature into a structured taxonomy comprising six thematic pillars: (1)~internal state-based detection, (2)~uncertainty quantification and entropy-based methods, (3)~attention-based detection, (4)~evaluation and benchmarking, (5)~mitigation through calibration and retrieval augmentation, and (6)~explainability and human trust. For each pillar, we analyze core methodologies, key contributions, and inherent limitations. We further provide a comparative analysis across methods, identifying critical research gaps---including signal isolation, detection-mitigation disconnect, and trust calibration deficits---that remain unaddressed. Finally, we propose TRUEGUARD, a conceptual framework for unifying multi-signal hallucination detection with human-centered explainability and closed-loop mitigation, and outline promising future research directions for achieving truly trustworthy LLM deployment.
+\end{abstract}
+ 
+\begin{IEEEkeywords}
+Hallucination Detection, Large Language Models, Uncertainty Quantification, Explainable AI, Trustworthy AI, Survey, Literature Review.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+
+% =====================================================================
+% I. INTRODUCTION
+% =====================================================================
+\section{Introduction}
+
+\IEEEPARstart{O}{ver} the past few years, Large Language Models have reshaped how we think about natural language processing. Tools built on architectures like GPT-4, LLaMA, and Mistral can now draft legal memos, summarize medical records, tutor students in calculus, and write production-ready code---tasks that, not long ago, lay firmly in the domain of human expertise~\cite{trustllm, survey_alansari}. The pace of adoption has been staggering; virtually every industry is experimenting with some form of LLM integration.
+
+Yet anyone who has spent time working with these models knows they have a stubborn flaw: they sometimes make things up. The technical term is \emph{hallucination}, and it refers to the tendency of LLMs to generate text that reads well---grammatically correct, confidently stated, logically structured---but is simply wrong~\cite{uq_survey, survey_alansari}. A model might cite a paper that does not exist, invent a historical event, or confidently misstate a drug interaction. What makes this particularly dangerous is that hallucinated content often \emph{looks} indistinguishable from correct output to an untrained eye~\cite{human_trust}. For high-stakes applications in medicine, law, or finance, this unreliability is not just inconvenient; it is potentially harmful~\cite{trustllm}.
+
+Naturally, the research community has mobilized. One group of researchers has focused on peering inside the model itself, looking at hidden layer activations and internal representations for tell-tale signs that something has gone wrong during generation~\cite{mind, prism, mhad, hallushift}. Others have approached the problem from an information-theoretic angle, measuring how uncertain or ``confused'' the model seems to be about its own outputs~\cite{semantic_energy, epr, sep}. A separate line of work has studied how the model's attention mechanism shifts when it begins to fabricate, since hallucinating models often stop paying attention to the evidence they were given~\cite{map_misbelief, rauq}. Meanwhile, some researchers are working on the mitigation side---training models to say ``I don't know'' instead of guessing~\cite{calibrated_rl, entropy_spike}, or grounding outputs in retrieved documents so the model has something factual to lean on~\cite{expandr}. And then there is the human side of things: how do we explain to users what the model is doing, and how do we build the kind of trust that responsible deployment demands~\cite{xai_survey, human_trust}?
+
+Each of these directions has produced genuinely useful results. But here is the problem we keep running into: they have all evolved more or less independently. The group working on entropy-based detection is not, for the most part, talking to the group working on retrieval-augmented mitigation. Explainability researchers are developing frameworks for transparent AI, but those frameworks are not wired into the uncertainty signals that detection systems already produce. Calibration methods teach models to be honest about their confidence, yet nobody has studied whether users actually trust those calibrated outputs differently. The field is productive but fragmented, and that fragmentation is holding back real-world progress.
+
+This paper is our attempt to bridge that fragmentation. We review twenty recent works that, taken together, cover the major threads of hallucination research. Rather than simply summarizing each one, we organize them into a taxonomy that reveals how they relate to and complement each other. Here is what we set out to accomplish:
+
+\begin{enumerate}
+\item We build a \textbf{structured taxonomy} that groups these twenty works into six thematic pillars, making it easier to see who is solving which piece of the puzzle.
+
+\item We carry out a \textbf{comparative analysis} that goes across pillars, identifying where methods overlap, where they diverge, and under what conditions each approach tends to work best.
+
+\item We pinpoint \textbf{five research gaps} that remain open despite the collective progress---gaps around signal isolation, computational cost, the disconnect between detection and mitigation, the absence of proper explainability in detection systems, and the lack of calibration to human trust.
+
+\item Drawing on these observations, we sketch out \textbf{TRUEGUARD}, a conceptual framework for how multi-signal detection, explainability, and mitigation could be woven together into a single pipeline. We offer this not as a finished system but as a roadmap for future work.
+\end{enumerate}
+
+The rest of the paper proceeds as follows. Section~II lays out our taxonomy and walks through each of the six pillars in detail. Section~III steps back to compare methods across pillars. In Section~IV we spell out the research gaps we have identified. Section~V describes the TRUEGUARD concept. Section~VI discusses where we think the field should head next, and Section~VII wraps things up.
+
+% =====================================================================
+% II. TAXONOMY AND LITERATURE REVIEW
+% =====================================================================
+\section{Taxonomy and Literature Review}
+
+We have grouped the twenty reviewed papers into six thematic pillars. Each pillar tackles a different facet of the hallucination challenge, and we discuss every paper in the context of the pillar it best belongs to.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 1: Internal State-Based Detection}
+
+The intuition behind this pillar is straightforward: if a model is hallucinating, that fact should show up somewhere in the model's own internal computation. After all, the model ``knows'' what it knows and what it is making up---the question is whether we can read those signals. Six of the twenty papers we reviewed work along these lines.
+
+\subsubsection{MIND}
+Su et al.~\cite{mind} had a clean idea: instead of trying to verify LLM outputs after the fact (which is slow and expensive), why not watch the model's internal states as it generates and catch hallucinations in real time? Their framework, MIND, does exactly this. It trains a lightweight detector on the hidden representations that are already being computed during inference, so there is essentially no additional forward pass required. What makes MIND particularly appealing is that it does not need any human-annotated hallucination labels---it learns in an unsupervised fashion. The authors also contribute HELM, a benchmark that packages together diverse model outputs along with the corresponding internal states, giving other researchers a common testbed. The unsupervised aspect is more important than it might sound at first: labeling hallucinations at scale is expensive and subjective, so any method that avoids it has a real practical edge.
+
+\subsubsection{PRISM}
+One headache with supervised internal-state detectors is that they tend to overfit to whatever domain they were trained on. A detector trained on medical QA might fail miserably on legal text. Zhang et al.~\cite{prism} tackle this head-on with PRISM, which uses specially designed prompts to nudge the model's internal representations into a form where truthfulness-related structure becomes more pronounced and, crucially, more consistent across different domains. The underlying bet here is that the ``shape'' of truthfulness in a model's hidden states is actually domain-general---it just does not always surface clearly without some coaxing. Their experiments across multiple domains bear this out: PRISM lifts cross-domain detection performance by a meaningful margin.
+
+\subsubsection{MHAD}
+Zhang et al.~\cite{mhad} zoom in further. Rather than using all the hidden states, they employ linear probing to figure out exactly which neurons in which layers are most sensitive to hallucination. Their key finding is a bit surprising: hallucination awareness is not spread uniformly across the generation process. Instead, it is concentrated at two specific moments---the very beginning and the very end of generation. By extracting outputs from the identified neurons at just these two points and concatenating them into a compact vector, MHAD achieves strong detection without requiring a full-sequence analysis. It is a nice example of how targeted feature selection can outperform brute-force approaches.
+
+\subsubsection{Semantic Entropy Probes}
+Kossen et al.~\cite{sep} address a practical bottleneck. Semantic entropy is one of the better-performing uncertainty measures for hallucination detection, but computing it properly requires generating 5 to 10 additional output sequences per query and then clustering them by meaning. That is a lot of extra compute. The insight behind Semantic Entropy Probes (SEPs) is that the model's hidden states already contain enough information to approximate semantic entropy---you just need to learn to read it. SEPs are simple classifiers trained on the hidden states from a single generation. They skip the multi-sample step entirely. The interesting bit from their ablation work is that specific token positions and specific layers carry more of this information than others, hinting at a structured ``uncertainty representation'' inside the model.
+
+\subsubsection{HALLUSHIFT}
+Dasgupta et al.~\cite{hallushift} take a temporal perspective. Their argument is that hallucinations do not happen all at once; they creep in. A model might start out on solid factual ground and gradually drift into fabrication, much the way a person telling a story might begin accurately and slowly start embellishing. HALLUSHIFT monitors the statistical distribution of hidden states across generation steps, looking for shifts that signal this kind of factual drift. The analogy to human cognition is deliberate and, we think, apt: hallucination in both humans and machines often involves maintaining surface-level coherence while the underlying grounding slips away.
+
+\subsubsection{HALLUSHIFT++}
+Nath et al.~\cite{hallushift_pp} pick up where HALLUSHIFT left off and push the idea into multimodal territory. When models process both images and text, a new type of hallucination emerges: the model might describe objects that are not in an image or mischaracterize spatial relationships. HALLUSHIFT++ looks for irregularities in the layer-wise dynamics of Multimodal LLMs, going beyond simple distributional shifts to analyze layer-specific assumptions. One practical advantage worth noting: because this method looks at the model's internals rather than relying on an external LLM evaluator, it avoids the circular problem of using one potentially hallucinating model to evaluate another.
+
+\textbf{What this pillar tells us.} Collectively, these six papers make a strong case that hallucination is not just an output-level problem---it leaves fingerprints deep inside the model. We now have unsupervised methods~\cite{mind}, cross-domain techniques~\cite{prism}, fine-grained neuron-level tools~\cite{mhad}, efficient approximations~\cite{sep}, temporal monitors~\cite{hallushift}, and multimodal extensions~\cite{hallushift_pp}. The main limitation they all share is the need for white-box access. If you cannot look inside the model, none of these approaches will help.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 2: Uncertainty Quantification and Entropy-Based Methods}
+
+Where the first pillar looks at what the model is ``thinking'' internally, this one focuses on how sure (or unsure) the model is about what it is saying. The mathematics of uncertainty quantification offer a principled way to flag outputs that the model itself is shaky about.
+
+\subsubsection{Foundations of UQ for LLMs}
+Kang et al.~\cite{uq_survey} put together what is, to our knowledge, the most thorough survey of how uncertainty quantification applies to LLMs specifically. They walk through the classical distinction between epistemic uncertainty (the model does not have enough data to be sure) and aleatoric uncertainty (the question is genuinely ambiguous), and then trace how these ideas have been reworked for the peculiarities of autoregressive language generation. Their categorization of methods into confidence-based, sampling-based, and ensemble-based families gives a useful map of the landscape. Perhaps more valuably, they are candid about the open problems: most UQ methods are computationally heavy, transfer poorly across domains, and produce confidence estimates that are not well calibrated.
+
+\subsubsection{Semantic Energy}
+Here is a subtlety that Ma et al.~\cite{semantic_energy} noticed: standard semantic entropy works with probabilities that have already been through the softmax function, which can actually \emph{hide} how uncertain the model really is. Two very different logit distributions can collapse to similar-looking probability distributions after softmax. Semantic Energy sidesteps this by working directly on the logits from the penultimate layer, using a Boltzmann-inspired energy formulation to capture what the model ``really thinks'' before the probability normalization step smooths things over. The result is uncertainty estimates that are more sensitive to genuine model confusion, particularly in cases where semantic entropy gives misleadingly confident readings.
+
+\subsubsection{Entropy Production Rate}
+Most of the methods we have discussed so far assume you can look inside the model. Moslonka et al.~\cite{epr} do not have that luxury. They are targeting the increasingly common scenario where you are calling a commercial API---say, OpenAI's or Anthropic's---that gives you the generated text and maybe the top few log-probabilities per token, but nothing else. Working within these tight constraints, they derive an Entropy Production Rate from the available log-probabilities during non-greedy decoding. What stands out here is the one-shot design: you get a hallucination estimate from a single generation, without needing to re-query the API multiple times. For production settings where API calls cost money and add latency, this is a meaningful contribution.
+
+\textbf{What this pillar tells us.} These three papers collectively show that uncertainty, measured in the right way, is a reliable signal for hallucination. There is a clear trade-off at work, though: deeper access to the model yields better uncertainty estimates, but not everyone has that access. The field needs methods that degrade gracefully as model access becomes more restricted.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 3: Attention-Based Detection}
+
+Transformers are, at their core, attention machines. Every token generated is the product of a weighted mixture of information from all preceding tokens. When a model starts fabricating, those weights shift in characteristic ways---and several researchers have figured out how to read those shifts.
+
+\subsubsection{The Map of Misbelief}
+Hajji et al.~\cite{map_misbelief} make a contribution that we think has been somewhat underappreciated. They bring clarity to the distinction between intrinsic hallucinations (where the model contradicts something in its own input) and extrinsic hallucinations (where it fabricates information with no basis at all). This matters because, as their experiments show, these two types of hallucination require genuinely different detection strategies. Sampling-based approaches like semantic entropy are decent at catching extrinsic hallucinations but struggle with intrinsic ones. Flipping it around, their attention-based aggregation over input tokens turned out to be much better suited for intrinsic hallucinations. This complementarity is one of the strongest arguments for why multi-signal approaches might be necessary rather than merely nice to have.
+
+\subsubsection{RAUQ}
+The anonymous authors of RAUQ~\cite{rauq} discovered something specific and actionable: certain attention heads in the transformer---they call them ``uncertainty-aware'' heads---behave differently when the model is hallucinating. Specifically, these heads reduce their attention to previous context tokens, almost as if the model is ``looking away'' from the evidence. RAUQ identifies these heads automatically and folds their behavior into a recurrent scoring scheme that produces a sequence-level uncertainty estimate. The whole thing runs in a single forward pass, and they validate it across twelve different tasks and four LLMs. The range of that evaluation is reassuring; it suggests this is a real phenomenon, not an artifact of a particular model or dataset.
+
+\subsubsection{LLM-Check}
+Sriramanan et al.~\cite{llmcheck} take more of a kitchen-sink approach, which turns out to work surprisingly well. They look at hidden states, attention maps, and output probabilities all at once, and they test in both white-box and black-box settings. What really stands out is the efficiency: their methods achieve speedups of up to 450 times over conventional baselines while actually \emph{improving} detection accuracy. That is a big deal for anyone thinking about deploying hallucination detection in a production system where latency matters. They also look at detection in Retrieval-Augmented Generation settings, which is increasingly relevant as RAG becomes the default architecture for knowledge-intensive applications.
+
+\textbf{What this pillar tells us.} Attention patterns are a rich and underutilized resource for hallucination detection. The most important takeaway is the complementarity finding from Hajji et al.~\cite{map_misbelief}: different hallucination types leave different signatures, and no single signal catches them all. This is a strong motivator for fusion-based approaches.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 4: Evaluation and Benchmarking}
+
+Good benchmarks are the unglamorous backbone of any research field. Without them, it is hard to tell whether a new method is actually better or just evaluated in a favorable setting.
+
+\subsubsection{TrustLLM}
+Huang et al.~\cite{trustllm} approached trustworthiness as a multi-dimensional problem. Rather than focusing narrowly on hallucination, they evaluate LLMs across eight dimensions: truthfulness, safety, fairness, robustness, privacy, machine ethics, transparency, and accountability. They tested sixteen mainstream models across more than thirty datasets, and several of their findings deserve attention. Trustworthiness and raw capability tend to move together---better models are generally more trustworthy, which is encouraging. Proprietary models still lead on most trust dimensions, though the gap is narrowing. And there is a cautionary note: overly aggressive safety filtering can actually make things worse by causing the model to refuse legitimate queries, undermining the trust it is supposed to build.
+
+\subsubsection{Faithfulness Evaluation}
+Jing et al.~\cite{faithfulness} ground the evaluation problem in industrial reality. Working with travel-domain data at Expedia, they developed rubric templates for using LLMs as faithfulness judges, scoring generated content on quantifiable scales. They also tackled the data problem head-on by developing methods to generate synthetic unfaithful content, which can then be used to train or fine-tune NLI models. Their experiments show that GPT-4 gives surprisingly accurate and well-explained faithfulness judgments, and that NLI models fine-tuned on the synthetic data see genuine performance gains. It is practical work, and the field needs more of it.
+
+\subsubsection{Comprehensive Hallucination Survey}
+Alansari and Luqman~\cite{survey_alansari} put together what amounts to a field guide for hallucination research. They trace the full lifecycle---from data collection practices that introduce biases, through architectural decisions that create blind spots, to inference-time behaviors that trigger hallucination. Their taxonomies for detection methods and mitigation strategies provide a useful indexing system for anyone trying to navigate the growing literature. Where our review focuses on synthesizing across methods and identifying gaps, theirs provides a thorough catalog of what exists.
+
+\textbf{What this pillar tells us.} Evaluation infrastructure is maturing but remains uneven. Multi-dimensional evaluation~\cite{trustllm} and industry-grounded metrics~\cite{faithfulness} are both essential. The field would benefit from benchmarks that explicitly test the \emph{interaction} between detection, mitigation, and user-facing explanation---not just each in isolation.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 5: Mitigation Through Calibration and Retrieval Augmentation}
+
+Detecting hallucinations is only half the battle. The other half is doing something about them---ideally before the user ever sees the bad output.
+
+\subsubsection{Entropy Spike Detection with RL Calibration}
+One extended abstract~\cite{entropy_spike} proposes marrying two ideas that usually live in separate papers. The first idea is entropy spike detection: during generation, compute the entropy of the output distribution at each token and flag any sudden jumps (using z-score normalization) as signs of instability or confusion. The second idea is self-confidence calibration: train the model to assess its own confidence and compare that self-assessment against actual correctness. The clever part is in how these are combined. The RL reward function simultaneously penalizes unjustified certainty \emph{and} entropy spikes, so the model learns to be both well-calibrated and stable in its reasoning chains. Most RLHF methods use a single scalar reward; this fine-grained shaping gives the training signal more texture.
+
+\subsubsection{Behaviorally Calibrated Reinforcement Learning}
+Wu et al.~\cite{calibrated_rl} start from a provocative premise: hallucination is not a bug in the usual sense. It is the predictable outcome of training objectives that reward being ``right-ish'' over being honest. When a model is trained to maximize the probability of generating correct-looking text, it learns to guess aggressively---even a small chance of being right makes guessing more rewarding than admitting ignorance. Standard RL with binary rewards (right/wrong) makes this worse, producing what the authors memorably call ``good test-takers'' rather than ``honest communicators.'' Their fix: train the model to output calibrated probabilities using strictly proper scoring rules, and reward it for abstaining when it genuinely does not know. The standout result is their demonstration that calibration is a \emph{transferable meta-skill}---a smaller model, properly calibrated, can outperform a much larger frontier model on uncertainty quantification. That is a finding with real practical implications.
+
+\subsubsection{ExpandR}
+Yao et al.~\cite{expandr} come at the problem from the retrieval side. The idea behind retrieval-augmented generation is simple enough: before generating an answer, go find some relevant documents and use them as grounding. But most RAG systems bolt the retriever and the generator together without much coordination. ExpandR takes a different tack, jointly optimizing both components. The LLM learns to produce query expansions that the retriever can actually work with, and the retriever is trained to surface documents that the LLM can actually use. They achieve this joint optimization through Direct Preference Optimization, with a reward function that balances retrieval quality against generation consistency. The approach nets a 5\% improvement in retrieval performance, which, in a competitive field, is substantial.
+
+\textbf{What this pillar tells us.} Mitigation is not just about detecting bad outputs---it is about teaching models to behave differently. The calibration-as-meta-skill insight from Wu et al.~\cite{calibrated_rl} is particularly compelling. And the joint optimization in ExpandR~\cite{expandr} points toward a design philosophy where components (detector, retriever, generator) are tuned together rather than in isolation.
+
+% ---------------------------------------------------------------
+\subsection{Pillar 6: Explainability and Human Trust}
+
+All of the above is ultimately in service of a simple goal: people need to be able to trust LLM outputs. That requires not just technical reliability but also transparency---users need to understand when and why they should or should not believe what the model says.
+
+\subsubsection{XAI for LLMs}
+Herrera~\cite{xai_survey} takes a step back from specific methods and asks: what does it even mean for an LLM explanation to be ``good''? The answer, it turns out, depends on who is asking. Herrera identifies four dimensions that matter: \emph{faithfulness} (does the explanation reflect what the model actually did?), \emph{truthfulness} (is the explanation factually correct?), \emph{plausibility} (does it make sense to a human?), and \emph{contrastivity} (does it explain why the model chose \emph{this} answer over \emph{that} one?). These dimensions are not always aligned. A perfectly faithful explanation of a transformer's 96-head attention mechanism would be truthful but utterly implausible to most users. A plausible explanation might be a simplification that is actually unfaithful to the model's real process. Navigating these tensions is, Herrera argues, the central design challenge for XAI in the LLM era.
+
+\subsubsection{Human Trust in LLM Responses}
+Sharma et al.~\cite{human_trust} ran human studies to find out how explanations actually affect trust, and their results carry an uncomfortable implication. When participants were shown multiple model responses side by side, adding explanations did boost trust in the better responses---people used the explanations to discriminate. Good. But when participants evaluated responses one at a time (the way most real-world interactions work), the trust benefit vanished entirely. People trusted confident-sounding responses roughly equally, whether or not those responses were accompanied by explanations, and regardless of whether those responses were actually correct. In other words, explanations help people \emph{compare} but not \emph{evaluate in isolation}. For system designers, this means that generating explanations is necessary but not sufficient; you also need to design the interaction to enable meaningful comparison.
+
+\textbf{What this pillar tells us.} The gap between what detection systems produce (numbers) and what users need (understanding) is vast. The technical capability exists to generate grounded explanations---attention maps, entropy values, and distribution shifts are all interpretable phenomena---but nobody has yet wired these signals into user-facing explanation systems. And even once they do, the interaction design will matter as much as the explanation content~\cite{human_trust}.
+
+% =====================================================================
+% III. COMPARATIVE ANALYSIS
+% =====================================================================
+\section{Comparative Analysis}
+
+Now that we have walked through each pillar individually, we can step back and look at the cross-cutting patterns. Several themes recur throughout the literature in ways that merit discussion.
+
+\subsection{The Complementarity Argument}
+
+If there is one finding from this review that we want to emphasize, it is this: different detection signals catch different kinds of hallucinations. Hajji et al.~\cite{map_misbelief} showed it most directly---attention works for intrinsic hallucinations, entropy works for extrinsic ones---but the pattern is broader. Internal state probes~\cite{mind, mhad, sep} pick up on representational anomalies, distribution shift trackers~\cite{hallushift, hallushift_pp} catch temporal drift, and entropy monitors~\cite{semantic_energy} flag low-confidence outputs. None of them covers the full spectrum alone.
+
+Table~\ref{tab:comparison} summarizes how the detection methods compare along several practical dimensions.
+
+\begin{table*}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Comparative Analysis of Hallucination Detection Methods}
+\label{tab:comparison}
+\centering
+\begin{tabular}{l c c c c c c}
+\toprule
+\textbf{Method} & \textbf{Signal Type} & \textbf{Model Access} & \textbf{Extra Passes} & \textbf{Supervision} & \textbf{Intrinsic} & \textbf{Extrinsic} \\
+\midrule
+MIND~\cite{mind} & Internal States & White-box & 0 & Unsupervised & Moderate & Moderate \\
+PRISM~\cite{prism} & Internal States & White-box & 0 & Supervised & Good & Moderate \\
+MHAD~\cite{mhad} & Internal States & White-box & 0 & Supervised & Moderate & Good \\
+SEPs~\cite{sep} & Internal States & White-box & 0 & Supervised & Good & Good \\
+HALLUSHIFT~\cite{hallushift} & Dist. Shift & White-box & 0 & Unsupervised & Good & Moderate \\
+HALLUSHIFT++~\cite{hallushift_pp} & Dist. Shift & White-box & 0 & Unsupervised & Good & Moderate \\
+Semantic Energy~\cite{semantic_energy} & Logit Entropy & White-box & 0 & Unsupervised & Weak & Strong \\
+EPR~\cite{epr} & Token Entropy & Black-box & 0 & Supervised & Weak & Moderate \\
+Map of Misbelief~\cite{map_misbelief} & Attention & White-box & 0 & Unsupervised & Strong & Weak \\
+RAUQ~\cite{rauq} & Attention & White-box & 0 & Unsupervised & Strong & Moderate \\
+LLM-Check~\cite{llmcheck} & Multi-signal & Both & 0--1 & Both & Good & Good \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{The Efficiency Question}
+
+There is an ongoing tension between how well a method detects hallucinations and how much it costs to run. Semantic entropy gets strong numbers but needs 5 to 10 extra generation passes per query~\cite{sep}. SEPs and RAUQ manage single-pass detection, though they give up some accuracy. LLM-Check~\cite{llmcheck} suggests that this trade-off is not fixed: with careful engineering, it is possible to get 450$\times$ speedups without losing quality. The broader lesson, supported by the SEPs result~\cite{sep} that hidden states already encode semantic entropy, is that the relevant information may already be there in a single pass---we just need better ways to extract it.
+
+\subsection{The Access Problem}
+
+It is worth being blunt about this: most of the best methods need to see inside the model. Internal state probes, attention analysis, logit-level entropy---all of these require white-box access~\cite{mind, prism, mhad, sep, hallushift, semantic_energy, map_misbelief, rauq}. Only EPR~\cite{epr} and parts of LLM-Check~\cite{llmcheck} work when you are stuck behind an API. Given that many real-world deployments use proprietary models accessible only through APIs, this is a significant blind spot in the literature.
+
+\subsection{Detection and Mitigation: Ships in the Night}
+
+One thing that struck us as we worked through these papers is how little connection there is between detection research and mitigation research. The detection papers~\cite{mind, prism, mhad, sep, hallushift, semantic_energy, epr, map_misbelief, rauq, llmcheck} produce hallucination scores but do not say what should happen next. The mitigation papers~\cite{entropy_spike, calibrated_rl, expandr} change model behavior but are not plugged into any detection system. The entropy spike work~\cite{entropy_spike} is a partial exception---it uses detection signals in the reward function---and Wu et al.~\cite{calibrated_rl} arrive at a similar conclusion from the calibration side. But in general, these two communities could be doing more to talk to each other.
+
+\subsection{Where Are the Explanations?}
+
+Perhaps the most conspicuous gap: every single detection system produces either a number or a binary flag. None of them tells the user \emph{why} something was flagged. This is strange, because the signals being used for detection---attention shifts, entropy spikes, distributional drift---are inherently interpretable phenomena. Meanwhile, Herrera~\cite{xai_survey} has laid out a clear blueprint for what good explanations look like, and Sharma et al.~\cite{human_trust} have shown that explanations genuinely affect user trust. The raw material and the design principles both exist; they just have not been connected.
+
+% =====================================================================
+% IV. IDENTIFIED RESEARCH GAPS
+% =====================================================================
+\section{Identified Research Gaps}
+
+Let us distill the preceding analysis into five concrete gaps.
+
+\subsection{Gap 1: Signal Isolation}
+
+Nobody is combining more than two detection signals, even though there is solid evidence that different signals catch different things~\cite{map_misbelief, rauq, llmcheck}. A fusion mechanism that learns to weight internal states, attention, entropy, and distributional dynamics based on the context would, in principle, outperform any individual method. The challenge is designing that fusion in a way that does not just add parameters but genuinely leverages complementarity.
+
+\subsection{Gap 2: Computational Overhead}
+
+Combining multiple signals inherently adds cost. But the SEPs result~\cite{sep}---that hidden states encode semantic entropy---suggests that multiple signals might be extractable from the same computation. If internal states, attention maps, and logit distributions are all available from a single forward pass, the additional cost of extracting multiple signals may be much lower than the cost of running multiple methods independently.
+
+\subsection{Gap 3: Detection--Mitigation Disconnect}
+
+Detection systems flag problems. Mitigation systems fix behavior. But they are not wired together. What would it look like if high-uncertainty detection triggered selective retrieval for just the uncertain claims, rather than applying retrieval augmentation everywhere indiscriminately? Or if a model could dynamically switch between confident generation and calibrated abstention based on real-time detection feedback? This closed-loop architecture is conspicuously absent in the current literature.
+
+\subsection{Gap 4: Explainability Deficit}
+
+Detection systems know \emph{why} they flagged something---because of an entropy spike, or an attention shift, or a distributional anomaly. But they do not tell the user that. Bridging this gap means translating technical signals into explanations that satisfy the four XAI dimensions Herrera~\cite{xai_survey} identified: faithful, truthful, plausible, and contrastive.
+
+\subsection{Gap 5: Trust Calibration Gap}
+
+Even when explanations exist, Sharma et al.~\cite{human_trust} showed that their effect on trust depends heavily on how they are presented. No existing system designs its trust communication with these empirical findings in mind. The result is a disconnect between what systems report (confidence scores) and what users experience (opaque, uncalibrated numbers).
+
+% =====================================================================
+% V. TRUEGUARD: A CONCEPTUAL FRAMEWORK
+% =====================================================================
+\section{TRUEGUARD: A Proposed Conceptual Framework}
+
+The gaps we have identified point toward a specific kind of system. We call it TRUEGUARD (Trustworthy, Unified, Real-time, Explainable Guard), and we offer it as a conceptual framework---a sketch of how multi-signal detection, explainability, and mitigation could fit together. It has four modules.
+
+\subsection{Module 1: Multi-Signal Detector}
+
+The detector would pull four types of signals from a single forward pass---each chosen to address a different slice of the hallucination spectrum:
+
+\begin{itemize}
+\item \textbf{Internal State Probes}, building on MIND~\cite{mind}, PRISM~\cite{prism}, MHAD~\cite{mhad}, and SEPs~\cite{sep}, to capture representation-level anomalies in specific layers and neurons.
+
+\item \textbf{Attention Anomaly Scores}, drawing from RAUQ~\cite{rauq} and Hajji et al.~\cite{map_misbelief}, to track whether the model is still paying attention to its input evidence.
+
+\item \textbf{Entropy-Energy Monitoring}, combining the logit-level analysis of Semantic Energy~\cite{semantic_energy} with token-level entropy spike detection~\cite{entropy_spike} and EPR-inspired~\cite{epr} entropy tracking.
+
+\item \textbf{Distribution Shift Tracking}, following HALLUSHIFT~\cite{hallushift} and HALLUSHIFT++~\cite{hallushift_pp}, to catch the gradual factual drift that single-step methods might miss.
+\end{itemize}
+
+These signals would feed into a learned fusion layer that weights them dynamically based on the task at hand. Because all four signals are extracted from data already computed during the forward pass (hidden states, attention weights, logits), additional overhead stays minimal.
+
+\subsection{Module 2: Explainability Engine}
+
+Instead of outputting a bare confidence score, TRUEGUARD would translate its detection signals into explanations grounded in Herrera's four dimensions~\cite{xai_survey}:
+
+\begin{itemize}
+\item \textbf{Token-level trust markers} show the user which specific words or phrases carry elevated risk, derived directly from per-token risk scores.
+\item \textbf{Contrastive rationales} explain what the model considered but rejected, using attention patterns and the alternative-token distribution as evidence.
+\item \textbf{Signal attribution} tells the user \emph{which} detector raised the alarm---was it an entropy spike, an attention shift, or a distributional anomaly?
+\item \textbf{Context-adaptive presentation} adjusts explanation depth based on the Sharma et al.~\cite{human_trust} finding that explanations work differently in comparative vs. isolated evaluation settings.
+\end{itemize}
+
+\subsection{Module 3: Closed-Loop Mitigation}
+
+When risk exceeds a threshold, the system would respond in stages:
+
+\begin{itemize}
+\item \textbf{Retrieval-augmented grounding}: Query a knowledge base using jointly optimized retrieval in the style of ExpandR~\cite{expandr}, targeting just the flagged claims rather than adding retrieval overhead everywhere.
+\item \textbf{Calibrated abstention}: If retrieval does not resolve the uncertainty, apply behavioral calibration~\cite{calibrated_rl} to produce an honest response that communicates what the model knows and what it does not.
+\item \textbf{Feedback loop}: Feed detection outcomes back into training via fine-grained reward shaping~\cite{entropy_spike, calibrated_rl}, so the system improves over time.
+\end{itemize}
+
+\subsection{Module 4: Trust-Aware Evaluation}
+
+Drawing on TrustLLM~\cite{trustllm} and the faithfulness evaluation work of Jing et al.~\cite{faithfulness}, the evaluation module would track not just detection accuracy but also explanation quality, mitigation effectiveness, and whether the system's trust scores actually align with measured user trust.
+
+% =====================================================================
+% VI. FUTURE RESEARCH DIRECTIONS
+% =====================================================================
+\section{Future Research Directions}
+
+We close the substantive part of this review by highlighting directions we think deserve focused attention going forward.
+
+\textbf{Multi-signal fusion architectures.} The most immediate open question is how best to combine heterogeneous hallucination signals. Learned weighting, information-theoretic approaches, and task-conditional routing are all plausible directions, and empirical comparisons across hallucination types and task domains would help the community converge on practical design principles.
+
+\textbf{Multimodal hallucination.} HALLUSHIFT++~\cite{hallushift_pp} has shown that internal state analysis can extend to vision-language models, but the surface has barely been scratched. Cross-modal attention, visual grounding, and modality-specific uncertainty all need investigation in the context of multi-signal detection.
+
+\textbf{Online calibration.} Wu et al.~\cite{calibrated_rl} demonstrated that calibration transfers across tasks, but real deployments face distribution shifts over time. How to maintain calibration quality in a non-stationary environment---perhaps through online learning or periodic re-calibration---is an open question.
+
+\textbf{Personalized trust.} People differ in how they respond to model explanations and confidence indicators~\cite{human_trust}. Adapting explanation style, abstention thresholds, and confidence presentation to individual user profiles would advance the vision of stakeholder-aware AI that Herrera~\cite{xai_survey} articulates.
+
+\textbf{Safety guarantees.} Connecting the empirical UQ methods surveyed by Kang et al.~\cite{uq_survey} with formal verification techniques could move the field from ``probably safe'' to ``provably safe''---a requirement for the most critical deployment settings.
+
+\textbf{Privacy-preserving detection.} Training detection systems across institutions without sharing sensitive model internals would address the privacy dimension of TrustLLM~\cite{trustllm}. Federated learning approaches are a natural fit here but have not been explored in this context.
+
+\textbf{Scaling to very large models.} Methods like SEPs~\cite{sep} and MHAD~\cite{mhad} are efficient for 7B--13B models, but the probing and feature extraction strategies may need rethinking for 70B+ parameter models where even modest overhead adds up.
+
+\textbf{Closing the black-box gap.} As long as there is a quality gap between white-box and black-box detection, a large fraction of real-world deployments will be underserved. Pushing EPR-style~\cite{epr} methods further, or finding entirely new ways to extract hallucination signals from limited API outputs, is a practical priority.
+
+% =====================================================================
+% VII. CONCLUSION
+% =====================================================================
+\section{Conclusion}
+
+We set out to make sense of a field that is moving fast and growing in several directions at once. The twenty papers we reviewed span internal state analysis~\cite{mind, prism, mhad, sep, hallushift, hallushift_pp}, uncertainty quantification~\cite{semantic_energy, uq_survey, epr}, attention-based detection~\cite{map_misbelief, rauq, llmcheck}, evaluation and benchmarking~\cite{trustllm, faithfulness, survey_alansari}, calibration and mitigation~\cite{entropy_spike, calibrated_rl, expandr}, and explainability and trust~\cite{xai_survey, human_trust}. Each has contributed something real to our understanding of hallucination.
+
+What became clear in the course of this review is the degree to which these efforts are complementary. Attention methods and entropy methods, internal probes and distribution trackers, detection systems and mitigation strategies---they are all solving pieces of the same puzzle, but largely without reference to each other. The strongest result any single method achieves still leaves significant types of hallucination unaddressed. Meanwhile, the user-facing side of the problem---explaining and calibrating trust---has developed almost entirely disconnected from the technical detection work that could ground it.
+
+We proposed TRUEGUARD as a way to think about how these pieces might come together: multi-signal fusion for detection, grounded explanations for transparency, and closed-loop mitigation for active correction. It is a conceptual framework, not a finished product, and turning it into something real will require effort from several subcommunities that have not collaborated much so far.
+
+What seems clear to us is that the hallucination problem will not be solved by any single clever method. It requires connecting detection to mitigation, mitigation to explanation, and explanation to actual human understanding. We hope this review helps make those connections a little more visible.
+
+% =====================================================================
+% REFERENCES
+% =====================================================================
+
+\begin{thebibliography}{20}
+
+\bibitem{mind}
+W.~Su, C.~Wang, Q.~Ai, Y.~Hu, Z.~Wu, Y.~Zhou, and Y.~Liu, ``Unsupervised real-time hallucination detection based on the internal states of large language models,'' \emph{Dept. Comput. Sci. Technol., Tsinghua University}, 2024.
+
+\bibitem{prism}
+F.~Zhang, P.~Yu, B.~Yi, B.~Zhang, T.~Li, and Z.~Liu, ``Prompt-guided internal states for hallucination detection of large language models,'' \emph{Nankai University}, 2024.
+
+\bibitem{trustllm}
+Y.~Huang, L.~Sun, H.~Wang, S.~Wu, Q.~Zhang \emph{et~al.}, ``TrustLLM: Trustworthiness in large language models,'' \emph{Multi-Institutional Collaboration}, 2024.
+
+\bibitem{semantic_energy}
+H.~Ma, J.~Pan, J.~Liu, Y.~Chen, J.~T.~Zhou, G.~Wang, Q.~Hu, H.~Wu, C.~Zhang, and H.~Wang, ``Semantic energy: Detecting LLM hallucination beyond entropy,'' \emph{Tianjin University and Baidu Inc.}, 2024.
+
+\bibitem{mhad}
+L.~Zhang, D.~Song, Z.~Wu, Y.~Tian, C.~Zhou, J.~Xu, Z.~Yang, and S.~Zhang, ``Detecting hallucination in large language models through deep internal representation analysis,'' \emph{Beijing Institute of Technology}, 2024.
+
+\bibitem{entropy_spike}
+Anonymous, ``Entropy spike detection and self-confidence calibration for hallucination mitigation,'' \emph{Extended Abstract}, 2025.
+
+\bibitem{uq_survey}
+S.~Kang, Y.~F.~Bakman, D.~N.~Yaldiz, B.~Buyukates, and S.~Avestimehr, ``Uncertainty quantification for hallucination detection in large language models: Foundations, methodology, and future directions,'' \emph{Univ. Southern California}, Oct. 2025.
+
+\bibitem{xai_survey}
+F.~Herrera, ``Making sense of the unsensible: Reflection, survey, and challenges for XAI in large language models toward human-centered AI,'' \emph{Univ. Granada and ADIA Lab}, May 2025.
+
+\bibitem{map_misbelief}
+E.~Hajji, A.~Bouguerra, and F.~Arnez, ``The map of misbelief: Tracing intrinsic and extrinsic hallucinations through attention patterns,'' \emph{Universit\'{e} Paris-Saclay, CEA-List}, 2024.
+
+\bibitem{faithfulness}
+X.~Jing, S.~Billa, and D.~Godbout, ``On a scale from 1 to 5: Quantifying hallucination in faithfulness evaluation,'' in \emph{Findings Assoc. Comput. Linguistics: NAACL 2025}, pp.~7780--7795, 2025.
+
+\bibitem{rauq}
+Anonymous, ``Efficient hallucination detection for LLMs using uncertainty-aware attention heads,'' \emph{Under review at ICLR 2026}, 2025.
+
+\bibitem{llmcheck}
+G.~Sriramanan, S.~Bharti, V.~S.~Sadasivan, S.~Saha, P.~Kattakinda, and S.~Feizi, ``LLM-Check: Investigating detection of hallucinations in large language models,'' \emph{Univ. Maryland}, 2024.
+
+\bibitem{hallushift}
+S.~Dasgupta, S.~Nath, A.~Basu, P.~Shamsolmoali, and S.~Das, ``HALLUSHIFT: Measuring distribution shifts towards hallucination detection in LLMs,'' 2024.
+
+\bibitem{sep}
+J.~Kossen, J.~Han, M.~Razzak, L.~Schut, S.~Malik, and Y.~Gal, ``Semantic entropy probes: Robust and cheap hallucination detection in LLMs,'' \emph{Univ. Oxford}, 2024.
+
+\bibitem{calibrated_rl}
+J.~Wu, J.~Liu, Z.~Zeng, T.~Zhan, T.~Cai, and W.~Huang, ``Mitigating LLM hallucination via behaviorally calibrated reinforcement learning,'' \emph{ByteDance Seed and Carnegie Mellon Univ.}, 2025.
+
+\bibitem{hallushift_pp}
+S.~Nath, A.~Basu, S.~Dasgupta, and S.~Das, ``HALLUSHIFT++: Bridging language and vision through internal representation shifts for hierarchical hallucinations in MLLMs,'' 2024.
+
+\bibitem{epr}
+C.~Moslonka, H.~Randrianarivo, A.~Garnier, and E.~Malherbe, ``Learned hallucination detection in black-box LLMs using token-level entropy production rate,'' \emph{Artefact Research Center, CentraleSup\'{e}lec}, 2024.
+
+\bibitem{survey_alansari}
+A.~Alansari and H.~Luqman, ``Large language models hallucination: A comprehensive survey,'' \emph{KFUPM}, 2024.
+
+\bibitem{human_trust}
+M.~Sharma, H.~C.~Siu, R.~Paleja, and J.~D.~Pe\~{n}a, ``Why would you suggest that? Human trust in language model responses,'' \emph{MIT Lincoln Laboratory}, 2024.
+
+\bibitem{expandr}
+S.~Yao, P.~Huang, Z.~Liu, Y.~Gu, Y.~Yan, S.~Yu, and G.~Yu, ``ExpandR: Teaching dense retrievers beyond queries with LLM guidance,'' in \emph{Proc. EMNLP 2025}, pp.~19036--19054, 2025.
+
+\end{thebibliography}
+
+\vfill
+
+\end{document}

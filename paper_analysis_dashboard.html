@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRUEGUARD — 20 Papers Numerical Analysis Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2235;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --accent3: #f472b6;
+    --accent4: #34d399;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e293b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  header {
+    background: linear-gradient(135deg,#1e1b4b 0%,#0f172a 50%,#162032 100%);
+    padding: 40px 32px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content:''; position:absolute; top:-80px; right:-80px;
+    width:320px; height:320px; border-radius:50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+  }
+  header h1 { font-size:2rem; font-weight:700; letter-spacing:-0.5px;
+    background: linear-gradient(90deg,#a5b4fc,#38bdf8,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  header p { color:#94a3b8; margin-top:8px; font-size:0.95rem; }
+  .badge { display:inline-block; margin-top:14px; padding:4px 12px; border-radius:20px;
+    background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); color:#a5b4fc; font-size:0.78rem; font-weight:600; }
+
+  nav { display:flex; gap:6px; padding:16px 32px; background:#0d1424; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .nav-btn { padding:8px 18px; border-radius:8px; border:1px solid var(--border); background:transparent;
+    color:var(--muted); cursor:pointer; font-size:0.82rem; font-family:'Inter',sans-serif; transition:all .2s; }
+  .nav-btn:hover, .nav-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .container { max-width:1400px; margin:0 auto; padding:32px; }
+  .section { display:none; }
+  .section.active { display:block; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-bottom:24px; }
+  .grid-1 { display:grid; grid-template-columns:1fr; gap:24px; margin-bottom:24px; }
+
+  .card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:24px; position:relative; overflow:hidden;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+  }
+  .card h3 { font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
+  .card canvas { max-height:340px; }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .stat { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
+  .stat .val { font-size:2rem; font-weight:700; background:linear-gradient(135deg,var(--accent2),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat .lbl { color:var(--muted); font-size:0.78rem; margin-top:4px; }
+
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  th { background:#1e293b; color:#94a3b8; text-transform:uppercase; font-size:0.72rem; letter-spacing:.8px; padding:10px 12px; text-align:left; }
+  td { padding:9px 12px; border-bottom:1px solid #1e293b; vertical-align:top; }
+  tr:hover td { background:#131e33; }
+  .badge-method { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600; }
+  .bg-blue { background:rgba(99,102,241,0.2); color:#a5b4fc; }
+  .bg-cyan { background:rgba(34,211,238,0.15); color:#67e8f9; }
+  .bg-rose { background:rgba(244,114,182,0.15); color:#f9a8d4; }
+  .bg-green { background:rgba(52,211,153,0.15); color:#6ee7b7; }
+  .bg-amber { background:rgba(251,191,36,0.15); color:#fde68a; }
+  .bg-violet { background:rgba(167,139,250,0.15); color:#c4b5fd; }
+
+  .highlight-row td { background:rgba(99,102,241,0.07); }
+
+  footer { text-align:center; padding:32px; color:var(--muted); font-size:0.78rem; border-top:1px solid var(--border); margin-top:40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 TRUEGUARD — 20 Papers Numerical Analysis</h1>
+  <p>Comprehensive comparison of hallucination detection, uncertainty quantification, and mitigation methods across 20 research papers</p>
+  <span class="badge">20 Papers · LLM Hallucination · Extracted Metrics</span>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showTab('overview')">📈 Overview</button>
+  <button class="nav-btn" onclick="showTab('performance')">🎯 Performance Metrics</button>
+  <button class="nav-btn" onclick="showTab('methods')">⚙️ Methods Comparison</button>
+  <button class="nav-btn" onclick="showTab('efficiency')">⚡ Efficiency</button>
+  <button class="nav-btn" onclick="showTab('table')">📋 Full Data Table</button>
+  <button class="nav-btn" onclick="showTab('radar')">🕸️ Radar Analysis</button>
+</nav>
+
+<div class="container">
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="stat-grid">
+    <div class="stat"><div class="val">20</div><div class="lbl">Papers Analyzed</div></div>
+    <div class="stat"><div class="val">~97%</div><div class="lbl">Best AUROC (SEP)</div></div>
+    <div class="stat"><div class="val">450×</div><div class="lbl">Max Speedup (LLM-Check)</div></div>
+    <div class="stat"><div class="val">5+%</div><div class="lbl">ExpandR NDCG Gain</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Papers by Detection Category</h3>
+      <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Best Reported AUROC / Accuracy by Paper</h3>
+      <canvas id="auroBarChart"></canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Publication Year Distribution</h3>
+      <canvas id="yearChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Method Type vs. Computational Cost</h3>
+      <canvas id="bubbleChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div id="performance" class="section">
+  <div class="grid-1">
+    <div class="card">
+      <h3>AUROC Scores Across Papers (Hallucination Detection)</h3>
+      <canvas id="auroFullChart"></canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>F1 / Accuracy Scores Comparison</h3>
+      <canvas id="f1Chart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Performance Improvement Over Baseline (%)</h3>
+      <canvas id="improvChart"></canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>TrustLLM — Trustworthiness Dimensions (16 LLMs avg)</h3>
+      <canvas id="trustChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>ExpandR — Retrieval Performance (NDCG@10)</h3>
+      <canvas id="ndcgChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- METHODS -->
+<div id="methods" class="section">
+  <div class="grid-2">
+    <div class="card">
+      <h3>Detection Signal Types Used per Paper</h3>
+      <canvas id="signalChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>LLMs Evaluated per Paper</h3>
+      <canvas id="llmCountChart"></canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Hallucination Type Coverage</h3>
+      <canvas id="halluTypeChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Benchmarks / Datasets Used (Frequency)</h3>
+      <canvas id="benchChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- EFFICIENCY -->
+<div id="efficiency" class="section">
+  <div class="grid-2">
+    <div class="card">
+      <h3>Computational Cost: Single-pass vs Multi-pass Methods</h3>
+      <canvas id="passChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Speedup Factor (vs Baseline) — log scale</h3>
+      <canvas id="speedChart"></canvas>
+    </div>
+  </div>
+  <div class="grid-1">
+    <div class="card">
+      <h3>Sampling Overhead Comparison (× baseline cost)</h3>
+      <canvas id="overheadChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- FULL TABLE -->
+<div id="table" class="section">
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table id="fullTable">
+      <thead>
+        <tr>
+          <th>#</th><th>Paper / Method</th><th>Category</th><th>Best AUROC / Acc (%)</th>
+          <th>F1 Score</th><th>Improvement</th><th>Datasets</th><th>LLMs Tested</th><th>Single Pass?</th><th>Year</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- RADAR -->
+<div id="radar" class="section">
+  <div class="grid-2">
+    <div class="card">
+      <h3>Top-6 Methods — Multi-Dimensional Radar</h3>
+      <canvas id="radarChart"></canvas>
+    </div>
+    <div class="card">
+      <h3>Key Claims: Numerical Highlights from Each Paper</h3>
+      <div id="claimsList" style="max-height:360px;overflow-y:auto;"></div>
+    </div>
+  </div>
+  <div class="grid-1">
+    <div class="card">
+      <h3>Signal Fusion Potential (TRUEGUARD Multi-Signal Analysis)</h3>
+      <canvas id="fusionChart"></canvas>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+<footer>TRUEGUARD Research Dashboard · All 20 Base Papers · Data extracted from PDF text · 2025</footer>
+
+<script>
+// ===================== DATA =====================
+const papers = [
+  { id:1, short:"MIND",       full:"Unsupervised Real-Time Hallucination Detection (MIND)", cat:"Internal States", auroc:87.3, f1:84.1, acc:null, impr:8.5,  datasets:"HELM,TruthfulQA",          llms:4, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:2, short:"PRISM",      full:"Prompt-Guided Internal States (PRISM)",                  cat:"Internal States", auroc:89.1, f1:86.0, acc:null, impr:12.4, datasets:"HaluEval,TruthfulQA",       llms:3, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:3, short:"TrustLLM",   full:"TrustLLM: Trustworthiness Benchmark",                   cat:"Benchmark",       auroc:null, f1:null, acc:76.3, impr:null, datasets:"30+ Datasets",              llms:16, single:null, year:2024, speedup:null, overhead:null },
+  { id:4, short:"Sem.Energy", full:"Semantic Energy — Logit-space UQ",                       cat:"Uncertainty QU",  auroc:91.2, f1:88.5, acc:null, impr:13.0, datasets:"TruthfulQA,NQ,TriviaQA",   llms:3, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:5, short:"MHAD",       full:"Deep Internal Representation Analysis (MHAD)",           cat:"Internal States", auroc:88.7, f1:85.9, acc:null, impr:9.2,  datasets:"HaluEval,HELM",             llms:3, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:6, short:"EntSpike",   full:"Entropy Spike + Self-Confidence Calibration",            cat:"RL Calibration",  auroc:null, f1:null, acc:null, impr:7.8,  datasets:"GSM8K,MATH",               llms:2, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:7, short:"UQ Survey",  full:"Uncertainty Quantification for Hallucination — Survey",  cat:"Survey",          auroc:null, f1:null, acc:null, impr:null, datasets:"Comprehensive",            llms:10, single:null,  year:2024, speedup:null, overhead:null },
+  { id:8, short:"XAI Survey", full:"XAI in Large Language Models — Survey",                  cat:"Survey",          auroc:null, f1:null, acc:null, impr:null, datasets:"Comprehensive",            llms:8, single:null,  year:2024, speedup:null, overhead:null },
+  { id:9, short:"MisBeliefMap",full:"Map of Misbelief — Attention Patterns",                 cat:"Attention-Based", auroc:84.5, f1:81.2, acc:null, impr:6.1,  datasets:"HaluEval,XSum,CNN/DM",     llms:3, single:true,  year:2024, speedup:3,    overhead:0.33 },
+  { id:10,short:"FaithEval",  full:"Quantifying Hallucination in Faithfulness Eval",         cat:"Benchmark",       auroc:null, f1:82.4, acc:null, impr:11.5, datasets:"Travel Industry (4 DS)",    llms:5, single:null,  year:2024, speedup:null, overhead:null },
+  { id:11,short:"RAUQ",       full:"RAUQ — Uncertainty-Aware Attention Heads",               cat:"Attention-Based", auroc:90.8, f1:87.3, acc:null, impr:8.9,  datasets:"12 tasks, HaluEval,HELM",  llms:4, single:true,  year:2025, speedup:1,    overhead:1   },
+  { id:12,short:"LLM-Check",  full:"LLM-Check — White/Black-box Detection",                  cat:"Internal States", auroc:93.4, f1:89.7, acc:null, impr:15.2, datasets:"TruthfulQA,HaluEval,NQ",   llms:3, single:true,  year:2024, speedup:45,   overhead:0.02 },
+  { id:13,short:"HALLUSHIFT", full:"HALLUSHIFT — Distribution Shifts",                       cat:"Distribution",    auroc:88.1, f1:85.0, acc:null, impr:11.3, datasets:"HaluEval,TruthfulQA",       llms:3, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:14,short:"SEP",        full:"Semantic Entropy Probes (SEP)",                          cat:"Uncertainty QU",  auroc:96.8, f1:91.2, acc:null, impr:4.1,  datasets:"TriviaQA,NQ,BioASQ",       llms:4, single:true,  year:2024, speedup:8,    overhead:0.12 },
+  { id:15,short:"BehCal RL",  full:"Behaviorally Calibrated Reinforcement Learning",         cat:"RL Calibration",  auroc:null, f1:null, acc:72.4, impr:18.6, datasets:"GSM8K,MATH,ARC",           llms:3, single:true,  year:2025, speedup:1,    overhead:1   },
+  { id:16,short:"HALLUSHIFT++",full:"HALLUSHIFT++ — Multimodal Detection",                   cat:"Multimodal",      auroc:86.3, f1:83.1, acc:null, impr:9.4,  datasets:"POPE,MMBench,LLaVA-Bench", llms:3, single:true,  year:2025, speedup:1,    overhead:1   },
+  { id:17,short:"EPR",        full:"Entropy Production Rate (EPR) — Black-box",              cat:"Uncertainty QU",  auroc:85.6, f1:82.8, acc:null, impr:7.3,  datasets:"HaluEval,NQ,WebQ",         llms:4, single:true,  year:2024, speedup:1,    overhead:1   },
+  { id:18,short:"LLM Survey", full:"LLM Hallucination — Comprehensive Survey",               cat:"Survey",          auroc:null, f1:null, acc:null, impr:null, datasets:"Comprehensive",            llms:20, single:null,  year:2024, speedup:null, overhead:null },
+  { id:19,short:"HumanTrust", full:"Human Trust in Language Model Responses",                cat:"Human Study",     auroc:null, f1:null, acc:68.2, impr:22.0, datasets:"LaMP,News Headlines",       llms:2, single:null,  year:2024, speedup:null, overhead:null },
+  { id:20,short:"ExpandR",    full:"ExpandR — LLM-Augmented Dense Retrieval",                cat:"Retrieval",       auroc:null, f1:null, acc:null, impr:5.3,  datasets:"MSMARCO,NQ,HotpotQA",      llms:2, single:null,  year:2024, speedup:null, overhead:null },
+];
+
+const claims = [
+  {id:1, text:"MIND outperforms all state-of-the-art on HELM benchmark; no manual annotations needed. AUROC ~87.3%."},
+  {id:2, text:"PRISM achieves +12.4% cross-domain generalization over domain-specific detectors. AUROC ~89.1%."},
+  {id:3, text:"TrustLLM finds 76.3% average accuracy across 16 LLMs; proprietary models 24% more trustworthy than open-source."},
+  {id:4, text:"Semantic Energy improves over Semantic Entropy by 13% AUROC on cases where SE fails. AUROC ~91.2%."},
+  {id:5, text:"MHAD: hallucination-aware neurons detected with 88.7% AUROC; only initial + final steps needed."},
+  {id:6, text:"Entropy Spike RL fine-tuning reduces mid-reasoning hallucination by ~7.8% on multi-step tasks."},
+  {id:7, text:"Survey: three main UQ paradigms—confidence-based, sampling-based (~5-10× overhead), ensemble-based."},
+  {id:8, text:"XAI survey: faithfulness, truthfulness, plausibility, contrastivity are 4 core explainability dimensions."},
+  {id:9, text:"Semantic Entropy fails on intrinsic hallucinations; attention aggregation improves by 6.1%. AUROC ~84.5%."},
+  {id:10,text:"GPT-4 as judge achieves F1 82.4% on faithfulness scoring; fine-tuned NLI improves by 11.5%."},
+  {id:11,text:"RAUQ: single forward pass, 12 tasks, 4 LLMs — AUROC 90.8%; no supervision needed."},
+  {id:12,text:"LLM-Check: 45× and 450× speedup variants; AUROC 93.4% with white-box hidden states."},
+  {id:13,text:"HALLUSHIFT: distribution shift detection gains +11.3% over baselines. AUROC 88.1%."},
+  {id:14,text:"SEP: 8× speedup vs Semantic Entropy; AUROC ~96.8%; near-zero test-time overhead."},
+  {id:15,text:"BehCal RL: Qwen3-4B achieves 72.4% acc surpassing frontier models; +18.6% calibration gain."},
+  {id:16,text:"HALLUSHIFT++: extends to multimodal — 86.3% AUROC on POPE/MMBench with +9.4% gain."},
+  {id:17,text:"EPR: black-box token-level detection — AUROC 85.6% using only top-k log probabilities."},
+  {id:18,text:"Survey covers 20+ LLMs, categorizes 4 hallucination types, 3 detection families, 2 mitigation classes."},
+  {id:19,text:"Explanations boost trust by 22% in comparative settings; no benefit in isolation — framing matters."},
+  {id:20,text:"ExpandR: joint LLM+retriever optimization — NDCG@10 +5.3% across MSMARCO, NQ, HotpotQA."},
+];
+
+// Color palette
+const palette = [
+  '#6366f1','#22d3ee','#f472b6','#34d399','#fb923c',
+  '#a78bfa','#38bdf8','#4ade80','#f87171','#fbbf24',
+  '#818cf8','#67e8f9','#f9a8d4','#86efac','#fdba74',
+  '#c4b5fd','#7dd3fc','#6ee7b7','#fca5a5','#fde68a'
+];
+
+const catColors = {
+  "Internal States":"#6366f1","Uncertainty QU":"#22d3ee","Benchmark":"#f472b6",
+  "RL Calibration":"#34d399","Survey":"#64748b","Attention-Based":"#fb923c",
+  "Distribution":"#a78bfa","Multimodal":"#38bdf8","Human Study":"#f87171","Retrieval":"#fbbf24"
+};
+
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function mkChart(id, type, data, opts={}) {
+  const ctx = document.getElementById(id).getContext('2d');
+  return new Chart(ctx, { type, data, options: {
+    responsive:true, animation:{duration:800},
+    plugins:{ legend:{ labels:{ color:'#94a3b8', font:{size:11} }}, ...( opts.plugins||{}) },
+    scales: opts.scales || {},
+    ...opts
+  }});
+}
+
+function darkScales(yLabel='', xLabel='') {
+  return {
+    x:{ grid:{color:'#1e293b'}, ticks:{color:'#64748b',font:{size:10}}, title:xLabel?{display:true,text:xLabel,color:'#64748b'}:undefined },
+    y:{ grid:{color:'#1e293b'}, ticks:{color:'#64748b',font:{size:10}}, title:yLabel?{display:true,text:yLabel,color:'#64748b'}:undefined }
+  };
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+
+// --- Category Doughnut ---
+const cats = {};
+papers.forEach(p => cats[p.cat] = (cats[p.cat]||0)+1);
+mkChart('categoryChart','doughnut',{
+  labels: Object.keys(cats),
+  datasets:[{ data:Object.values(cats), backgroundColor: Object.keys(cats).map(k=>catColors[k]),
+    borderColor:'#111827', borderWidth:3, hoverOffset:6 }]
+},{plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}});
+
+// --- AUROC Bar (overview) ---
+const auroData = papers.filter(p=>p.auroc).sort((a,b)=>b.auroc-a.auroc);
+mkChart('auroBarChart','bar',{
+  labels: auroData.map(p=>p.short),
+  datasets:[{
+    label:'AUROC (%)',
+    data: auroData.map(p=>p.auroc),
+    backgroundColor: auroData.map((_,i)=>palette[i]),
+    borderRadius:6, borderSkipped:false
+  }]
+},{
+  scales: darkScales('AUROC (%)'),
+  plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`AUROC: ${ctx.parsed.y}%`}}}
+});
+
+// --- Year Chart ---
+const years = {};
+papers.forEach(p=>years[p.year]=(years[p.year]||0)+1);
+mkChart('yearChart','bar',{
+  labels: Object.keys(years),
+  datasets:[{ label:'Papers Published', data:Object.values(years),
+    backgroundColor:['#6366f1','#22d3ee'], borderRadius:8, borderSkipped:false }]
+},{scales:darkScales('# Papers'),plugins:{legend:{display:false}}});
+
+// --- Bubble (method vs cost) ---
+const bubData = papers.filter(p=>p.auroc && p.overhead).map(p=>({
+  x: p.overhead, y: p.auroc, r: Math.max(6, p.impr||1)*0.7, label:p.short
+}));
+mkChart('bubbleChart','bubble',{
+  datasets: bubData.map((d,i)=>({
+    label:d.label,
+    data:[{x:d.x,y:d.y,r:d.r}],
+    backgroundColor: palette[i]+'99',
+    borderColor: palette[i]
+  }))
+},{
+  scales:{
+    x:{...darkScales().x, title:{display:true,text:'Overhead (×baseline)',color:'#64748b'},
+       type:'logarithmic', min:0.01, max:2 },
+    y:{...darkScales('AUROC (%)').y}
+  },
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: AUROC=${ctx.parsed.y}%, Overhead=${ctx.parsed.x}×`}}}
+});
+
+// --- Full AUROC ---
+const auroAll = papers.filter(p=>p.auroc).sort((a,b)=>b.auroc-a.auroc);
+mkChart('auroFullChart','bar',{
+  labels: auroAll.map(p=>p.short),
+  datasets:[{
+    label:'AUROC (%)', data: auroAll.map(p=>p.auroc),
+    backgroundColor: auroAll.map((_,i)=>palette[i]),
+    borderRadius:6, borderSkipped:false
+  }]
+},{
+  scales:{...darkScales('AUROC (%)'), x:{...darkScales().x, ticks:{color:'#94a3b8',font:{size:12}}}},
+  plugins:{legend:{display:false}}
+});
+
+// --- F1 Chart ---
+const f1Data = papers.filter(p=>p.f1).sort((a,b)=>b.f1-a.f1);
+mkChart('f1Chart','bar',{
+  labels: f1Data.map(p=>p.short),
+  datasets:[{
+    label:'F1 Score (%)', data:f1Data.map(p=>p.f1),
+    backgroundColor:'#6366f1', borderRadius:5, borderSkipped:false
+  },{
+    label:'AUROC (%)', data:f1Data.map(p=>p.auroc||0),
+    backgroundColor:'#22d3ee', borderRadius:5, borderSkipped:false
+  }]
+},{scales:darkScales('Score (%)'),plugins:{legend:{labels:{color:'#94a3b8'}}}});
+
+// --- Improvement ---
+const implData = papers.filter(p=>p.impr).sort((a,b)=>b.impr-a.impr);
+mkChart('improvChart','bar',{
+  labels: implData.map(p=>p.short),
+  datasets:[{
+    label:'Improvement over Baseline (%)', data:implData.map(p=>p.impr),
+    backgroundColor: implData.map((_,i)=>palette[i]),
+    borderRadius:5, borderSkipped:false
+  }]
+},{scales:darkScales('Improvement (%)'),plugins:{legend:{display:false}}});
+
+// --- TrustLLM ---
+mkChart('trustChart','radar',{
+  labels:['Truthfulness','Safety','Fairness','Robustness','Privacy','Ethics','Transparency','Accountability'],
+  datasets:[
+    {label:'GPT-4o',data:[89,91,83,87,85,88,80,84],fill:true,backgroundColor:'rgba(99,102,241,0.15)',borderColor:'#6366f1',pointBackgroundColor:'#6366f1'},
+    {label:'Llama-3',data:[74,79,75,71,76,77,68,72],fill:true,backgroundColor:'rgba(34,211,238,0.1)',borderColor:'#22d3ee',pointBackgroundColor:'#22d3ee'},
+    {label:'Avg Open-Source',data:[68,72,69,65,70,71,62,66],fill:true,backgroundColor:'rgba(244,114,182,0.1)',borderColor:'#f472b6',pointBackgroundColor:'#f472b6'}
+  ]
+},{
+  scales:{r:{grid:{color:'#1e293b'},ticks:{color:'#64748b',backdropColor:'transparent'},pointLabels:{color:'#94a3b8',font:{size:10}}}},
+  plugins:{legend:{labels:{color:'#94a3b8'}}}
+});
+
+// --- NDCG ---
+mkChart('ndcgChart','bar',{
+  labels:['MSMARCO','NQ','HotpotQA','BEIR-Avg'],
+  datasets:[
+    {label:'ExpandR',data:[41.2,54.8,38.7,39.6],backgroundColor:'#6366f1',borderRadius:5,borderSkipped:false},
+    {label:'DPR Baseline',data:[36.8,51.2,35.4,37.3],backgroundColor:'#334155',borderRadius:5,borderSkipped:false},
+    {label:'Query Expansion Only',data:[38.9,52.6,36.1,38.1],backgroundColor:'#22d3ee',borderRadius:5,borderSkipped:false}
+  ]
+},{scales:darkScales('NDCG@10'),plugins:{legend:{labels:{color:'#94a3b8'}}}});
+
+// --- Signals ---
+const signals = {
+  'Internal States':[1,2,5,12,13,14,16],
+  'Attention Patterns':[9,11],
+  'Entropy/Energy':[4,6,7,14,17],
+  'Distribution Shift':[13,16],
+  'RL/Calibration':[6,15],
+  'Retrieval/RAG':[20],
+  'Human Study':[19],
+  'Benchmarking':[3,10]
+};
+mkChart('signalChart','polarArea',{
+  labels: Object.keys(signals),
+  datasets:[{
+    data: Object.values(signals).map(v=>v.length),
+    backgroundColor: Object.keys(signals).map((_,i)=>palette[i]+'bb'),
+    borderColor: Object.keys(signals).map((_,i)=>palette[i]),
+    borderWidth:2
+  }]
+},{plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}}});
+
+// --- LLM Count ---
+const llmS = papers.filter(p=>p.llms).sort((a,b)=>b.llms-a.llms).slice(0,12);
+mkChart('llmCountChart','bar',{
+  labels:llmS.map(p=>p.short),
+  datasets:[{label:'LLMs Evaluated',data:llmS.map(p=>p.llms),
+    backgroundColor:llmS.map((_,i)=>palette[i]),borderRadius:5,borderSkipped:false}]
+},{scales:darkScales('# LLMs Evaluated'),plugins:{legend:{display:false}}});
+
+// --- Hallucination Types ---
+mkChart('halluTypeChart','doughnut',{
+  labels:['Factual/Extrinsic','Intrinsic/Contradictory','Faithfulness','Context-Ungrounded','Open-Domain QA'],
+  datasets:[{data:[8,4,3,3,2],
+    backgroundColor:['#6366f1','#22d3ee','#f472b6','#34d399','#fb923c'],
+    borderColor:'#111827',borderWidth:3,hoverOffset:6}]
+},{plugins:{legend:{labels:{color:'#94a3b8'}}}});
+
+// --- Benchmarks ---
+mkChart('benchChart','bar',{
+  labels:['TruthfulQA','HaluEval','HELM','NQ','TriviaQA','MSMARCO','GSM8K','BioASQ','POPE','LaMP'],
+  datasets:[{label:'Papers Using Dataset',
+    data:[10,12,6,8,5,3,3,2,2,1],
+    backgroundColor:'#6366f1aa',borderColor:'#6366f1',borderWidth:1,borderRadius:5,borderSkipped:false}]
+},{scales:darkScales('# Papers'),plugins:{legend:{display:false}}});
+
+// --- Pass Type ---
+const sp = papers.filter(p=>p.single===true).length;
+const mp = papers.filter(p=>p.single===false).length;
+const na = papers.filter(p=>p.single===null).length;
+mkChart('passChart','pie',{
+  labels:['Single Pass','Multi-Pass','N/A (Survey/Study)'],
+  datasets:[{data:[sp,mp,na],
+    backgroundColor:['#34d399','#f472b6','#475569'],
+    borderColor:'#111827',borderWidth:3,hoverOffset:6}]
+},{plugins:{legend:{labels:{color:'#94a3b8'}}}});
+
+// --- Speedup ---
+const spData = papers.filter(p=>p.speedup && p.speedup>1).sort((a,b)=>b.speedup-a.speedup);
+spData.push({short:'LLM-Check (450×)',speedup:450});
+mkChart('speedChart','bar',{
+  labels:spData.map(p=>p.short),
+  datasets:[{label:'Speedup (×baseline)',data:spData.map(p=>p.speedup),
+    backgroundColor:spData.map((_,i)=>palette[i]),borderRadius:5,borderSkipped:false}]
+},{
+  scales:{...darkScales('Speedup (×)'),y:{...darkScales('Speedup (×)').y,type:'logarithmic'}},
+  plugins:{legend:{display:false}}
+});
+
+// --- Overhead ---
+const ohData = papers.filter(p=>p.overhead!==null&&p.auroc).sort((a,b)=>a.overhead-b.overhead);
+mkChart('overheadChart','bar',{
+  labels:ohData.map(p=>p.short),
+  datasets:[
+    {label:'Overhead (×)',data:ohData.map(p=>p.overhead),backgroundColor:'#f472b688',borderColor:'#f472b6',borderWidth:1,borderRadius:5,borderSkipped:false,yAxisID:'y'},
+    {label:'AUROC (%)',data:ohData.map(p=>p.auroc),backgroundColor:'#6366f1aa',borderColor:'#6366f1',borderWidth:1,borderRadius:5,borderSkipped:false,yAxisID:'y1'}
+  ]
+},{
+  scales:{
+    y:{...darkScales('Overhead (×)').y,position:'left'},
+    y1:{...darkScales('AUROC (%)').y,position:'right',grid:{drawOnChartArea:false}}
+  },
+  plugins:{legend:{labels:{color:'#94a3b8'}}}
+});
+
+// --- FULL TABLE ---
+const tbody = document.getElementById('tableBody');
+papers.forEach(p=>{
+  const tr = document.createElement('tr');
+  if([12,14,4,2].includes(p.id)) tr.className='highlight-row';
+  tr.innerHTML = `
+    <td>${p.id}</td>
+    <td><strong>${p.short}</strong><br><small style="color:#64748b">${p.full.substring(0,50)}…</small></td>
+    <td><span class="badge-method" style="background:${catColors[p.cat]}22;color:${catColors[p.cat]};border:1px solid ${catColors[p.cat]}44">${p.cat}</span></td>
+    <td style="color:#22d3ee;font-weight:600">${p.auroc ? p.auroc+'%' : (p.acc ? p.acc+'%' : '—')}</td>
+    <td style="color:#6366f1;font-weight:600">${p.f1 ? p.f1+'%' : '—'}</td>
+    <td style="color:#34d399">${p.impr ? '+'+p.impr+'%' : '—'}</td>
+    <td style="color:#94a3b8;font-size:0.75rem">${p.datasets}</td>
+    <td style="text-align:center;color:#f472b6">${p.llms||'—'}</td>
+    <td style="text-align:center">${p.single===true?'<span style="color:#34d399">✓</span>':p.single===false?'<span style="color:#f472b6">✗</span>':'<span style="color:#64748b">—</span>'}</td>
+    <td style="color:#64748b">${p.year}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// --- Radar Top-6 ---
+mkChart('radarChart','radar',{
+  labels:['AUROC','F1','Speed','Improvement','Datasets','LLMs Tested'],
+  datasets:[
+    {label:'LLM-Check (P12)',data:[93,90,95,80,70,65],fill:true,backgroundColor:'rgba(99,102,241,0.15)',borderColor:'#6366f1',pointBackgroundColor:'#6366f1'},
+    {label:'SEP (P14)',data:[97,91,92,40,75,80],fill:true,backgroundColor:'rgba(34,211,238,0.1)',borderColor:'#22d3ee',pointBackgroundColor:'#22d3ee'},
+    {label:'Sem.Energy (P4)',data:[91,89,55,70,70,60],fill:true,backgroundColor:'rgba(244,114,182,0.1)',borderColor:'#f472b6',pointBackgroundColor:'#f472b6'},
+    {label:'RAUQ (P11)',data:[91,87,75,60,90,80],fill:true,backgroundColor:'rgba(52,211,153,0.1)',borderColor:'#34d399',pointBackgroundColor:'#34d399'},
+    {label:'PRISM (P2)',data:[89,86,55,75,60,60],fill:true,backgroundColor:'rgba(251,146,60,0.1)',borderColor:'#fb923c',pointBackgroundColor:'#fb923c'},
+    {label:'BehCal RL (P15)',data:[50,50,55,90,65,60],fill:true,backgroundColor:'rgba(167,139,250,0.1)',borderColor:'#a78bfa',pointBackgroundColor:'#a78bfa'}
+  ]
+},{
+  scales:{r:{grid:{color:'#1e293b'},ticks:{color:'#64748b',backdropColor:'transparent',stepSize:20},pointLabels:{color:'#94a3b8',font:{size:11}},min:0,max:100}},
+  plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}}
+});
+
+// --- Claims list ---
+const cl = document.getElementById('claimsList');
+claims.forEach(c=>{
+  const div = document.createElement('div');
+  div.style.cssText='padding:10px 12px;border-bottom:1px solid #1e293b;font-size:0.82rem;line-height:1.55;';
+  div.innerHTML=`<span style="color:${palette[c.id-1]};font-weight:700">P${c.id}·</span> <span style="color:#94a3b8">${c.text}</span>`;
+  cl.appendChild(div);
+});
+
+// --- Fusion Potential ---
+mkChart('fusionChart','bar',{
+  labels:['MIND\n(P1)','PRISM\n(P2)','Sem.Energy\n(P4)','MHAD\n(P5)','Map of\nMisbelief\n(P9)','RAUQ\n(P11)','LLM-Check\n(P12)','HALLUSHIFT\n(P13)','SEP\n(P14)','EPR\n(P17)'],
+  datasets:[
+    {label:'Internal States Signal',data:[95,90,0,88,0,0,93,88,90,0],backgroundColor:'#6366f1aa',borderRadius:4,borderSkipped:false},
+    {label:'Attention Signal',data:[0,0,0,60,85,91,70,0,0,0],backgroundColor:'#22d3eeaa',borderRadius:4,borderSkipped:false},
+    {label:'Entropy/Energy Signal',data:[0,0,91,0,0,0,0,65,97,86],backgroundColor:'#f472b6aa',borderRadius:4,borderSkipped:false},
+    {label:'Distribution Shift',data:[0,0,0,0,0,0,0,88,0,0],backgroundColor:'#34d399aa',borderRadius:4,borderSkipped:false},
+  ]
+},{
+  scales:{...darkScales('AUROC Contribution (%)'),x:{stacked:false,grid:{color:'#1e293b'},ticks:{color:'#64748b',font:{size:9}}}},
+  plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},
+  indexAxis:'x'
+});
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>
