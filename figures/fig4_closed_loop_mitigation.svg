@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720">
+  <defs>
+    <style>
+      .title{font:700 34px Arial, Helvetica, sans-serif; fill:#111}
+      .h{font:700 20px Arial, Helvetica, sans-serif; fill:#111}
+      .t{font:16px Arial, Helvetica, sans-serif; fill:#222}
+      .muted{fill:#666}
+      .box{fill:#fff; stroke:#cfcfcf; stroke-width:2; rx:16; ry:16}
+      .stage1{stroke:#2b6cb0}
+      .stage2{stroke:#2f855a}
+      .stage3{stroke:#c05621}
+      .arrow{stroke:#666; stroke-width:3; marker-end:url(#m)}
+      .loop{stroke:#6b46c1; stroke-width:3; marker-end:url(#m)}
+    </style>
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="720" fill="#ffffff"/>
+  <text x="60" y="70" class="title">Closed-loop mitigation pipeline</text>
+  <text x="60" y="110" class="t muted">Graduated response based on hallucination risk</text>
+
+  <!-- Start -->
+  <rect x="90" y="210" width="280" height="110" class="box"/>
+  <text x="230" y="250" text-anchor="middle" class="h">Generate draft</text>
+  <text x="230" y="285" text-anchor="middle" class="t muted">base LLM output</text>
+
+  <rect x="90" y="370" width="280" height="110" class="box"/>
+  <text x="230" y="410" text-anchor="middle" class="h">Assess risk</text>
+  <text x="230" y="445" text-anchor="middle" class="t muted">R(t), Rseq</text>
+
+  <line x1="230" y1="320" x2="230" y2="370" class="arrow"/>
+
+  <!-- Decision -->
+  <rect x="430" y="290" width="300" height="140" class="box"/>
+  <text x="580" y="335" text-anchor="middle" class="h">Decision</text>
+  <text x="580" y="370" text-anchor="middle" class="t">if Rseq d Ä ’ return</text>
+  <text x="580" y="400" text-anchor="middle" class="t">else ’ mitigate</text>
+
+  <line x1="370" y1="425" x2="430" y2="360" class="arrow"/>
+
+  <!-- Stage 1 -->
+  <rect x="790" y="210" width="520" height="110" class="box" style="stroke:#2b6cb0"/>
+  <text x="1050" y="250" text-anchor="middle" class="h">Stage 1: Retrieval-augmented grounding</text>
+  <text x="1050" y="285" text-anchor="middle" class="t muted">formulate query ’ retrieve evidence ’ regenerate span</text>
+
+  <!-- Stage 2 -->
+  <rect x="790" y="350" width="520" height="110" class="box" style="stroke:#2f855a"/>
+  <text x="1050" y="390" text-anchor="middle" class="h">Stage 2: Calibrated abstention</text>
+  <text x="1050" y="425" text-anchor="middle" class="t muted">if risk persists: report uncertainty / abstain</text>
+
+  <!-- Stage 3 -->
+  <rect x="790" y="490" width="520" height="110" class="box" style="stroke:#c05621"/>
+  <text x="1050" y="530" text-anchor="middle" class="h">Stage 3: Feedback for improvement</text>
+  <text x="1050" y="565" text-anchor="middle" class="t muted">reward shaping updates detector + mitigation policy</text>
+
+  <!-- Arrows through stages -->
+  <line x1="730" y1="360" x2="790" y2="265" class="arrow"/>
+  <line x1="1050" y1="320" x2="1050" y2="350" class="arrow"/>
+  <line x1="1050" y1="460" x2="1050" y2="490" class="arrow"/>
+
+  <!-- Loop back -->
+  <line x1="790" y1="545" x2="520" y2="545" class="loop"/>
+  <line x1="520" y1="545" x2="520" y2="430" class="loop"/>
+
+  <!-- End -->
+  <rect x="90" y="540" width="280" height="110" class="box"/>
+  <text x="230" y="580" text-anchor="middle" class="h">Return to user</text>
+  <text x="230" y="615" text-anchor="middle" class="t muted">answer + trust indicators</text>
+  <line x1="520" y1="430" x2="370" y2="595" class="arrow"/>
+</svg>

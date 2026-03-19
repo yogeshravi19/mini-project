@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs>
+    <style>
+      .title{font:700 34px Arial, Helvetica, sans-serif; fill:#111}
+      .h{font:700 20px Arial, Helvetica, sans-serif; fill:#111}
+      .t{font:16px Arial, Helvetica, sans-serif; fill:#222}
+      .muted{fill:#666}
+      .box{fill:#fff; stroke:#cfcfcf; stroke-width:2; rx:16; ry:16}
+      .sig{fill:#f7fafc; stroke:#cbd5e0; stroke-width:2; rx:14; ry:14}
+      .arrow{stroke:#666; stroke-width:3; marker-end:url(#m)}
+      .blue{stroke:#2b6cb0}
+      .orange{stroke:#c05621}
+      .green{stroke:#2f855a}
+      .purple{stroke:#6b46c1}
+    </style>
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="760" fill="#ffffff"/>
+  <text x="60" y="70" class="title">Multi-signal fusion (token-level)</text>
+  <text x="60" y="110" class="t muted">Four complementary signals fused into risk score R(t)</text>
+
+  <!-- Signals -->
+  <rect x="80" y="190" width="420" height="110" class="sig"/>
+  <text x="100" y="225" class="h">S_ISP(t): Internal state probes</text>
+  <text x="100" y="255" class="t">hidden layers ’ probe/MLP ’ per-token score</text>
+  <line x1="80" y1="190" x2="500" y2="190" class="blue" stroke-width="6"/>
+
+  <rect x="80" y="330" width="420" height="110" class="sig"/>
+  <text x="100" y="365" class="h">S_AAS(t): Attention anomaly score</text>
+  <text x="100" y="395" class="t">uncertainty-aware heads ’ context focus drop</text>
+  <line x1="80" y1="330" x2="500" y2="330" class="orange" stroke-width="6"/>
+
+  <rect x="80" y="470" width="420" height="110" class="sig"/>
+  <text x="100" y="505" class="h">S_EEM(t): Entropy / energy monitor</text>
+  <text x="100" y="535" class="t">entropy spikes + semantic energy (logits)</text>
+  <line x1="80" y1="470" x2="500" y2="470" class="green" stroke-width="6"/>
+
+  <rect x="80" y="610" width="420" height="110" class="sig"/>
+  <text x="100" y="645" class="h">S_DST(t): Distribution shift tracker</text>
+  <text x="100" y="675" class="t">windowed divergence in hidden-state dynamics</text>
+  <line x1="80" y1="610" x2="500" y2="610" class="purple" stroke-width="6"/>
+
+  <!-- Fusion -->
+  <rect x="620" y="300" width="360" height="240" class="box"/>
+  <text x="800" y="345" text-anchor="middle" class="h">Learned fusion</text>
+  <text x="800" y="385" text-anchor="middle" class="t">R(t)=Ã(W·[S1,S2,S3,S4]+b)</text>
+  <text x="800" y="420" text-anchor="middle" class="t muted">dynamic weighting by task/type</text>
+  <text x="800" y="470" text-anchor="middle" class="t">outputs token risk and attributions</text>
+
+  <!-- Arrows from signals to fusion -->
+  <line x1="500" y1="245" x2="620" y2="345" class="arrow"/>
+  <line x1="500" y1="385" x2="620" y2="385" class="arrow"/>
+  <line x1="500" y1="525" x2="620" y2="425" class="arrow"/>
+  <line x1="500" y1="665" x2="620" y2="465" class="arrow"/>
+
+  <!-- Outputs -->
+  <rect x="1080" y="260" width="260" height="130" class="box"/>
+  <text x="1210" y="300" text-anchor="middle" class="h">Token highlights</text>
+  <text x="1210" y="335" text-anchor="middle" class="t">trust coloring</text>
+  <text x="1210" y="365" text-anchor="middle" class="t muted">from R(t)</text>
+
+  <rect x="1080" y="420" width="260" height="130" class="box"/>
+  <text x="1210" y="460" text-anchor="middle" class="h">Span explanations</text>
+  <text x="1210" y="495" text-anchor="middle" class="t">signal attribution</text>
+  <text x="1210" y="525" text-anchor="middle" class="t muted">why it was flagged</text>
+
+  <rect x="1080" y="580" width="260" height="130" class="box"/>
+  <text x="1210" y="620" text-anchor="middle" class="h">Mitigation trigger</text>
+  <text x="1210" y="655" text-anchor="middle" class="t">if Rseq exceeds Ä</text>
+  <text x="1210" y="685" text-anchor="middle" class="t muted">RAG / abstain</text>
+
+  <line x1="980" y1="360" x2="1080" y2="320" class="arrow"/>
+  <line x1="980" y1="420" x2="1080" y2="485" class="arrow"/>
+  <line x1="980" y1="480" x2="1080" y2="645" class="arrow"/>
+</svg>

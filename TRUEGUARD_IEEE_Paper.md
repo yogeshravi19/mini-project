@@ -23,6 +23,8 @@ The rapid advancement of Large Language Models (LLMs) has fundamentally transfor
 
 Hallucination in LLMs refers to the generation of content that is fluent, syntactically well-formed, and plausible-sounding, yet factually inaccurate, fabricated, or unsupported by the input context or world knowledge [7][18]. Unlike traditional software bugs, hallucinations are particularly insidious because they maintain the surface-level qualities of correct outputs—coherence, grammaticality, and confidence—making them difficult for end users to distinguish from factual content [19]. This phenomenon undermines the foundational trust required for LLM adoption in consequential decision-making scenarios [3].
 
+![Fig. 1. Hallucination taxonomy used in this paper (intrinsic vs extrinsic).](figures/fig1_hallucination_taxonomy.svg)
+
 The research community has responded with substantial efforts across several independent directions. One prominent line of work leverages the *internal states* of LLMs—hidden representations, neuron activations, and layer-wise dynamics—to detect hallucination footprints during inference [1][2][5][13]. These approaches hypothesize that hallucinated outputs leave detectable traces within the model's computational pipeline, enabling detection without external knowledge bases. Complementarily, *uncertainty quantification* methods estimate the model's confidence through entropy-based measures [4][17], attention pattern analysis [9][11], and probe-based approximations of semantic entropy [14]. A third direction focuses on *mitigation*, employing reinforcement learning with calibrated rewards to teach models to abstain when uncertain [6][15] or leveraging retrieval-augmented generation to ground outputs in factual evidence [20]. Finally, *explainability* research [8] and *human trust studies* [19] have established principles for making AI systems transparent and calibrated to user expectations.
 
 Despite this rich body of work, a critical observation emerges from surveying these 20 foundational papers: **each approach addresses only a fragment of the hallucination problem, and no existing system unifies detection, explanation, and mitigation into a cohesive real-time pipeline.** Detection methods operate in isolation from mitigation strategies. Explainability frameworks are disconnected from the uncertainty signals that could make explanations more grounded. Calibration techniques lack integration with human trust dynamics. This fragmentation means that even as individual components improve, the overall trustworthiness of deployed LLM systems remains compromised.
@@ -103,6 +105,8 @@ From this comprehensive review, we identify five critical gaps that TRUEGUARD ad
 
 TRUEGUARD operates as an inline guard layer that intercepts the LLM's generation process, extracting multi-signal uncertainty information within a single forward pass, fusing these signals into a unified hallucination risk score, generating human-interpretable explanations, and triggering mitigation actions when necessary. The architecture comprises four interconnected modules, as described below.
 
+![Fig. 2. TRUEGUARD overview: single-pass detection → explanation → mitigation.](figures/fig2_trueguard_overview.svg)
+
 ### B. Module 1: Multi-Signal Hallucination Detector
 
 The detector extracts four complementary signals from a single forward pass:
@@ -156,6 +160,8 @@ A sequence-level risk score is derived as:
 
 where *τ* is a risk threshold, *γ* controls the penalty for multiple flagged tokens, and *T* is the sequence length.
 
+![Fig. 3. Multi-signal fusion: combining four token-level signals into risk score R(t).](figures/fig3_multi_signal_fusion.svg)
+
 ### D. Module 3: Explainability Engine
 
 The explainability module converts raw detection signals into human-interpretable outputs, guided by the four XAI dimensions identified by Herrera [8]:
@@ -172,6 +178,8 @@ The explainability module converts raw detection signals into human-interpretabl
 
 **Adaptive Explanation Depth:** Following findings from Sharma et al. [19] that explanation effectiveness depends on presentation context, explanations are adaptively tuned: comparative mode (when multiple responses are available) provides detailed contrastive analysis, while independent mode provides calibrated confidence summaries.
 
+![Fig. 5. Explainability dimensions (faithfulness, truthfulness, plausibility, contrastivity) and trust alignment.](figures/fig5_xai_trust_dimensions.svg)
+
 ### E. Module 4: Closed-Loop Mitigation Pipeline
 
 When the sequence-level risk score exceeds a configurable threshold, TRUEGUARD activates a graduated mitigation response:
@@ -181,6 +189,8 @@ When the sequence-level risk score exceeds a configurable threshold, TRUEGUARD a
 **Stage 2 — Calibrated Abstention:** If retrieval fails to reduce the risk score below threshold, the system employs behavioral calibration principles [15] to produce an honest response: the model either flags the specific claim with a calibrated uncertainty indicator ("This claim has approximately 40% reliability based on available evidence") or abstains entirely with an explanation of what it does know versus what remains uncertain.
 
 **Stage 3 — Reward Feedback:** Detection outcomes feed back into a training signal using reward shaping [6][15] that penalizes: (i) high hallucination risk scores on factually correct outputs (false alarms), (ii) low risk scores on hallucinated outputs (missed detections), and (iii) entropy spikes in validated reasoning chains (unstable generation). This enables continuous improvement of both the detector and the generator over time.
+
+![Fig. 4. Closed-loop mitigation: retrieval grounding → calibrated abstention → feedback.](figures/fig4_closed_loop_mitigation.svg)
 
 ### F. Training Procedure
 
