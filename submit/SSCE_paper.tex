@@ -1,0 +1,571 @@
+% =============================================================================
+% FINAL PROJECT TEMPLATE — Matching exact .md order
+% =============================================================================
+%
+% ===================== HOW TO USE =====================
+% 1. Upload this .tex to Overleaf and compile to PDF
+% 2. Download PDF and convert to Word (.docx)
+% 3. In Word, find each [PASTE HERE: ...] marker
+% 4. Copy from your FINAL.docx and replace the marker
+% 5. FORMAT RULES while pasting in Word:
+%    - Method names (MIND:, PRISM:, etc.) = BOLD
+%    - "What this pillar tells us." lines = ITALIC
+%    - Sub-heading names = BOLD
+%    - Citations = keep as [1], [2] etc.
+%    - Numbered items = 1) 2) 3) 4)
+%    - Bullet items = bullet points
+% =====================================================
+
+\documentclass[singlecolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+
+\geometry{
+    a4paper,
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\title{\textbf{Toward Trustworthy Large Language Models: A Comprehensive Review of Hallucination Detection, Explainability, and Mitigation Strategies}}
+
+\author{
+    Yogesh Ravi M\textsuperscript{a} \and Pradeep Kumar T S\textsuperscript{a} \\[6pt]
+    \textsuperscript{a}\textit{Department of Computer Science, Vellore Institute of Technology (VIT),} \\
+    \textit{Chennai, Tamil Nadu, India} \\[4pt]
+    \small{Corresponding author email: yogeshravi4343@gmail.com}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% =============================================================================
+% ABSTRACT
+% =============================================================================
+\begin{abstract}
+\noindent
+[PASTE HERE --- ABSTRACT: One single paragraph. Starts with ``Large Language Models (LLMs) have demonstrated...'' Ends with ``...truly trustworthy use of LLM.'']
+\end{abstract}
+
+\noindent\textbf{Keywords:} Hallucination Detection; Large Language Models; Uncertainty Quantification; Explainable AI; Trustworthy AI; Survey; Literature Review
+
+% =============================================================================
+% I. INTRODUCTION
+% =============================================================================
+\section{Introduction}
+\label{sec:introduction}
+
+[PASTE HERE --- INTRO PARA 1: ``Over the last several years, Large Language Models...'' to ``...some kind of LLM integration.'' Citations: [3], [18]]
+
+[PASTE HERE --- INTRO PARA 2: ``But as every one who has ever handled these models...'' to ``...but can be detrimental [3].'' Citations: [7], [18], [19], [3]]
+
+% --- Figure: Intrinsic vs Extrinsic (placed here as in .md line 20) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{08_intrinsic_vs_extrinsic_hallucination.png}
+    \caption{Intrinsic vs.\ extrinsic hallucination detection: Semantic Entropy excels at extrinsic hallucinations (89.3\% AUROC) while Attention Aggregation excels at intrinsic hallucinations (84.5\% AUROC), demonstrating signal complementarity (Source: Paper 9).}
+    \label{fig:intrinsic_extrinsic}
+\end{figure}
+
+[PASTE HERE --- INTRO PARA 3: ``The community of research has of course mobilized...'' to ``...[8], [19]?'' Citations: [1],[2],[5],[13],[4],[14],[17],[9],[11],[6],[15],[20],[8],[19]]
+
+[PASTE HERE --- INTRO PARA 4: ``All these directions have resulted in some really useful outcomes...'' to ``...disjuncture is crippling practical development.'']
+
+[PASTE HERE --- INTRO PARA 5: ``It is our effort to fill in this fragmentation in this paper. We review twenty newer pieces that when taken collectively will span the important currents in research on hallucinations. We do not just list them all, but we would work them out into a taxonomy that shows their relationship and complementation. We propose to achieve the following:'']
+
+\begin{enumerate}
+    \item [PASTE --- Objective 1: ``Then we create a systematic taxonomy...'']
+    \item [PASTE --- Objective 2: ``We conduct a comparative study...'']
+    \item [PASTE --- Objective 3: ``We identify five gaps in research...'']
+    \item [PASTE --- Objective 4: ``With these findings as our inputs, we delineate TRUE-GUARD...'']
+\end{enumerate}
+
+[PASTE HERE --- ROADMAP: ``The rest of the paper follows this way...'' to ``...Part VII is the conclusion.'']
+
+% =============================================================================
+% II. TAXONOMY AND LITERATURE REVIEW
+% =============================================================================
+\section{Taxonomy and Literature Review}
+\label{sec:taxonomy}
+
+[PASTE HERE --- TAXONOMY INTRO: ``The twenty papers that were reviewed...'' to ``...which pillar they belong.'']
+
+% -----------------------------------------------
+% A. Pillar 1: Internal State-Based Detection
+% -----------------------------------------------
+\subsection{Pillar 1: Internal State-Based Detection}
+\label{sec:pillar1}
+
+[PASTE HERE --- PILLAR 1 INTRO: ``The intuition of this pillar is easy to understand...'' to ``...six out of our twenty paper reviews.'']
+
+\textbf{MIND:} [PASTE HERE --- MIND: ``Su et al. [1] had a clear-cut idea...'' to ``...any technique that averts them has a practical advantage.'']
+
+\textbf{PRISM:} [PASTE HERE --- PRISM: ``The disadvantage of having one headache...'' to ``...significant boost to the cross-domain detectors.'']
+
+\textbf{MHAD:} [PASTE HERE --- MHAD: ``Zhang et al. [5] are zoomed in...'' to ``...feature selection as a means to win over brute force methods.'']
+
+\textbf{Semantic Entropy Probes:} [PASTE HERE --- SEPs: ``Kossen et al. [14] focus on a bottleneck at hand...'' to ``...uncertainty representation within the model.'']
+
+\textbf{HALLUSHIFT:} [PASTE HERE --- HALLUSHIFT: ``Dasgupta et al. [13] assume a temporal perspective...'' to ``...the veracity of the ground becomes lost.'']
+
+\textbf{HALLUSHIFT++:} [PASTE HERE --- HALLUSHIFT++: ``Given the title, Nath et al. [16] continue the thought...'' to ``...one potentially hallucinatory model to judge another.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 1 SUMMARY (make this italic in Word): ``Together, all six articles start a counterargument...'' to ``...you are not able to look inside the model.'']
+
+% -----------------------------------------------
+% B. Pillar 2: Uncertainty Quantification
+% -----------------------------------------------
+\subsection{Pillar 2: Uncertainty Quantification and Entropy-Based Methods}
+\label{sec:pillar2}
+
+[PASTE HERE --- PILLAR 2 INTRO: ``This is where the first pillar examines...'' to ``...the underlying model is not confident about.'']
+
+% --- Figure: SEP vs Semantic Entropy (placed here as in .md line 52) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{07_sep_vs_semantic_entropy.png}
+    \caption{SEP vs.\ Semantic Entropy --- Per-Model AUROC comparison across four LLMs. SEP achieves higher AUROC at 8$\times$ lower computational cost (Source: Paper 14).}
+    \label{fig:sep_vs_se}
+\end{figure}
+
+\textbf{Principles of UQ in LLMs:} [PASTE HERE --- UQ: ``Kang et al. [7] compile what is...'' to ``...make unwell-calibrated confidence estimates.'']
+
+\textbf{Semantic Energy:} [PASTE HERE --- Semantic Energy: ``This is a subtlety which Ma et al. [4] have observed...'' to ``...confidently read indications.'']
+
+\textbf{Entropy Production Rate:} [PASTE HERE --- EPR: ``The vast majority of approaches we have discussed up...'' to ``...generated with a latency delay.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 2 SUMMARY (italic in Word): ``All the three articles demonstrate that...'' to ``...access to a model becomes restricted.'']
+
+% -----------------------------------------------
+% C. Pillar 3: Attention-Based Detection
+% -----------------------------------------------
+\subsection{Pillar 3: Attention-Based Detection}
+\label{sec:pillar3}
+
+[PASTE HERE --- PILLAR 3 INTRO: ``At their fundamental level, transformers are attention machineries...'' to ``...how to read through those changes.'']
+
+% --- Figure: LLM-Check variants (placed here as in .md line 63) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{11_llmcheck_variants.png}
+    \caption{LLM-Check detection variants showing three settings from full white-box (93.4\% AUROC) to 450$\times$ faster black-box (89.2\% AUROC) (Source: Paper 12).}
+    \label{fig:llmcheck}
+\end{figure}
+
+\textbf{Map of Misbelief:} [PASTE HERE --- Map of Misbelief: ``We believe that it is an area...'' to ``...necessary and not just nice to have can be utilized.'']
+
+\textbf{RAUQ:} [PASTE HERE --- RAUQ: ``The authors of RAUQ [11] never identified themselves...'' to ``...not a construct of a specific model or data set.'']
+
+\textbf{LLM-Check:} [PASTE HERE --- LLM-Check: ``The approach of Sriramanan et al. [12] is closer to kitchen-sink...'' to ``...the default system of knowledge-intensive applications.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 3 SUMMARY (italic in Word): ``Hallucination analysis is a poorly exploited field...'' to ``...powerful driving factor of fusion-based strategies.'']
+
+% -----------------------------------------------
+% D. Pillar 4: Evaluation and Benchmarking
+% -----------------------------------------------
+\subsection{Pillar 4: Evaluation and Benchmarking}
+\label{sec:pillar4}
+
+[PASTE HERE --- PILLAR 4 INTRO: ``The thesaurus of any body of research is good benchmarks...'' to ``...without their presence.'']
+
+% --- Figure: TrustLLM dimensions (placed here as in .md line 74) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{06_trustllm_dimensions.png}
+    \caption{TrustLLM trustworthiness evaluation across eight dimensions for proprietary vs.\ open-source LLMs. GPT-4 leads in all dimensions (81--91\%), with the gap narrowing for open-source models (Source: Paper 3).}
+    \label{fig:trustllm}
+\end{figure}
+
+% --- Figure: Improvement over baseline (placed here as in .md line 77) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{04_improvement_over_baseline.png}
+    \caption{Percentage improvement over strongest baseline for each reviewed method. Human Trust framing (+22\%) and Behaviorally Calibrated RL (+18.6\%) show the largest gains (Sources: Papers 2,4,5,10--17,19,20).}
+    \label{fig:improvement}
+\end{figure}
+
+\textbf{TrustLLM:} [PASTE HERE --- TrustLLM: ``Huang et al. [3] considered trustworthiness...'' to ``...should undermine the trust that it aims to establish.'']
+
+\textbf{Faithfulness Evaluation:} [PASTE HERE --- Faithfulness: ``Jing et al. [10] base the evaluation problem...'' to ``...the discipline requires additional practice.'']
+
+\textbf{Comprehensive Hallucination Survey:} [PASTE HERE --- Survey: ``Alansari and Luqman [18] formed a compilation...'' to ``...what has previously been done.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 4 SUMMARY (italic in Word): ``Assessment infrastructure is healing yet is blown-out...'' to ``...not isolated but as a combination.'']
+
+% -----------------------------------------------
+% E. Pillar 5: Mitigation
+% -----------------------------------------------
+\subsection{Pillar 5: Mitigation Through Calibration and Retrieval Augmentation}
+\label{sec:pillar5}
+
+[PASTE HERE --- PILLAR 5 INTRO: ``Half the war is the diagnosis of hallucinations...'' to ``...the user can hear the bad output.'']
+
+\textbf{The entropy spike detection based on RL calibration:} [PASTE HERE --- Entropy spike: ``One extended abstract [6] suggests the marriage...'' to ``...most RLHF techniques utilize only a scalar reward.'']
+
+\textbf{Behaviorally Calibrated Reinforcement Learning:} [PASTE HERE --- BehCal-RL: ``Wu et al. have an eye-catching premise...'' to ``...one of the findings that are practical in nature.'']
+
+\textbf{ExpandR:} [PASTE HERE --- ExpandR: ``Yao et al. [20] approach the problem in the perspective of...'' to ``...in a competitive discipline, it is considerable.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 5 SUMMARY (italic in Word): ``The process of mitigation is not only detection...'' to ``...as opposed to being optimized individually.'']
+
+% -----------------------------------------------
+% F. Pillar 6: Explainability and Human Trust
+% -----------------------------------------------
+\subsection{Pillar 6: Explainability and Human Trust}
+\label{sec:pillar6}
+
+[PASTE HERE --- PILLAR 6 INTRO: ``All the above is geared towards the end result...'' to ``...what the model is telling them.'']
+
+% --- Figure: Human trust framing (placed here as in .md line 95) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{12_human_trust_framing.png}
+    \caption{Impact of explanation framing on user trust. Explanations boost trust by +22\% only in comparative evaluation settings; in isolated evaluation, the effect nearly disappears (Source: Paper 19).}
+    \label{fig:human_trust}
+\end{figure}
+
+\textbf{XAI of LLMs:} [PASTE HERE --- XAI: ``Herrera [8] steps out of methodological details...'' to ``...the main design problem facing XAI in the LLM age.'']
+
+\textbf{Human Trust in LLM Responses:} [PASTE HERE --- Human Trust: ``Sharma et al. [19] conducted human experiments...'' to ``...the interaction to facilitate meaningful comparison.'']
+
+\textit{What this pillar tells us.} [PASTE HERE --- PILLAR 6 SUMMARY (italic in Word): ``The difference between generated values by detection systems...'' to ``...the contents of the explanation [19].'']
+
+% =============================================================================
+% III. COMPARATIVE ANALYSIS
+% =============================================================================
+\section{Comparative Analysis}
+\label{sec:comparative}
+
+[PASTE HERE --- COMPARATIVE INTRO: ``Having walked through each pillar separately...'' to ``...should be discussed.'']
+
+\textbf{The Complementarity Argument.} [PASTE HERE: ``When it comes to making one or another finding...'' to ``...None of them can claim the entire spectrum.'']
+
+[PASTE HERE --- TABLE REF: ``Table I presents a summary of this comparison...'']
+
+\textbf{The Efficiency Question.} [PASTE HERE: ``There is a constant conflict...'' to ``...more effectively discover how to retrieve it.'']
+
+\textbf{The Access Problem.} [PASTE HERE: ``One would then want to be forthright about this...'' to ``...a major weakness in the literature.'']
+
+\textbf{Advertisement and Prevention: Ships in the Night.} [PASTE HERE: ``Among these things that stood out to us...'' to ``...more the two communities can do to communicate.'']
+
+\textbf{Where Are the Explanations?} [PASTE HERE: ``The most notable weakness, perhaps...'' to ``...they are just not tied.'']
+
+% --- TABLE I: Comparative Analysis (already filled — DO NOT EDIT) ---
+\begin{table}[H]
+\centering
+\caption{Comparative analysis of hallucination detection methods.}
+\label{tab:comparison}
+\small
+\begin{tabularx}{\textwidth}{l l l c c c c}
+\toprule
+\textbf{Method} & \textbf{Signal Type} & \textbf{Model Access} & \textbf{Extra Passes} & \textbf{Supervision} & \textbf{Intrinsic} & \textbf{Extrinsic} \\
+\midrule
+MIND {[1]}        & Internal States & White-box & 0 & Unsupervised & Moderate & Moderate \\
+PRISM {[2]}       & Internal States & White-box & 0 & Supervised   & Good     & Moderate \\
+MHAD {[5]}        & Internal States & White-box & 0 & Supervised   & Moderate & Good     \\
+SEPs {[14]}       & Internal States & White-box & 0 & Supervised   & Good     & Good     \\
+HALLUSHIFT {[13]} & Dist.\ Shift    & White-box & 0 & Unsupervised & Good     & Moderate \\
+HALLUSHIFT++ {[16]} & Dist.\ Shift  & White-box & 0 & Unsupervised & Good     & Moderate \\
+Sem.\ Energy {[4]}  & Logit Entropy & White-box & 0 & Unsupervised & Weak     & Strong   \\
+EPR {[17]}        & Token Entropy   & Black-box & 0 & Supervised   & Weak     & Moderate \\
+Map of Misbelief {[9]} & Attention  & White-box & 0 & Unsupervised & Strong   & Weak     \\
+RAUQ {[11]}       & Attention       & White-box & 0 & Unsupervised & Strong   & Moderate \\
+LLM-Check {[12]}  & Multi-signal    & Both      & 0--1 & Both      & Good     & Good     \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% --- Figure: AUROC vs F1 scatter ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{03_auroc_vs_f1_scatter.png}
+    \caption{AUROC vs.\ F1 Score for all detection methods. Marker shape indicates signal type and marker size indicates log(speedup). SEP and LLM-Check achieve the best overall performance.}
+    \label{fig:auroc_f1}
+\end{figure}
+
+% --- Figure: Speedup vs AUROC ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{05_speedup_vs_auroc_tradeoff.png}
+    \caption{Efficiency trade-off: Speedup factor (log scale) vs.\ AUROC. LLM-Check achieves up to 450$\times$ speedup while maintaining competitive AUROC, and SEP achieves the highest AUROC at 8$\times$ speedup.}
+    \label{fig:speedup}
+\end{figure}
+
+% =============================================================================
+% IV. IDENTIFIED RESEARCH GAPS
+% =============================================================================
+\section{Identified Research Gaps}
+\label{sec:gaps}
+
+[PASTE HERE --- GAPS INTRO: ``Let us distill the preceding analysis into five concrete gaps.'']
+
+\subsection{Gap 1: Signal Isolation}
+
+[PASTE HERE --- GAP 1: ``There is no one who is adding more than 2 detection signals...'' to ``...actually makes good use of the compliments.'']
+
+\subsection{Gap 2: Computational Overhead}
+
+[PASTE HERE --- GAP 2: ``Using a combination of multiple signals increases cost...'' to ``...run several methods separately.'']
+
+\subsection{Gap 3: Mitigation Disconnection connected with Detection}
+
+[PASTE HERE --- GAP 3: ``Problems are indicated by detection systems...'' to ``...not been conspicuously shown in literature at the moment.'']
+
+\subsection{Gap 4: Explainability Deficit}
+
+[PASTE HERE --- GAP 4: ``The detection systems are aware of how it was...'' to ``...faithful, truthful, plausible, and contrastive.'']
+
+\subsection{Gap 5: Trust Calibration Gap}
+
+[PASTE HERE --- GAP 5: ``Sharma et al. [19] demonstrated that the same explanations...'' to ``...opaque numbers without a calibration.'']
+
+% =============================================================================
+% V. TRUEGUARD
+% =============================================================================
+\section{TRUEGUARD: A Proposed Conceptual Framework}
+\label{sec:trueguard}
+
+[PASTE HERE --- TRUEGUARD INTRO: ``The gaps that we have identified are directed...'' to ``...It has four modules.'']
+
+% --- Figure: Cross-paper summary (placed here as in .md line 159) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{00_combined_summary_4panel.png}
+    \caption{Cross-paper numerical comparison: (top-left) AUROC on HaluEval benchmark, (top-right) SEP vs.\ Semantic Entropy per model, (bottom-left) intrinsic vs.\ extrinsic hallucination detection, (bottom-right) improvement over baseline for all reviewed methods.}
+    \label{fig:combined}
+\end{figure}
+
+\subsection{Module 1: Multi-Signal Detector}
+
+[PASTE HERE --- MODULE 1 INTRO: ``This module will be used to monitor the presence of more than one signal...'' and ``A single pass through the detector would extract four types of signals...'']
+
+Use bullet points in Word for these 4 items:
+
+\begin{itemize}
+    \item [PASTE --- Bullet 1: ``Internal State Probes To protect representation-level abnormalities...MIND [1], PRISM [2], MHAD [5], and SEPs [14].'']
+    \item [PASTE --- Bullet 2: ``Attention anomaly scores, based on RAUQ [11] and Hajji et al. [9]...attending to its input evidence.'']
+    \item [PASTE --- Bullet 3: ``Entropy-Energy Monitoring...Semantic Energy [4]...entropy spike monitoring [6]...EPR-inspired [17] entropy monitoring.'']
+    \item [PASTE --- Bullet 4: ``Distribution Shift, according to HALLUSHIFT [13] and HALLUSHIFT++ [16]...single-step methods could be unaware of.'']
+\end{itemize}
+
+[PASTE HERE --- MODULE 1 CLOSING: ``Such works would be read into an acquired seat union stratum...'' to ``...no further overhead would be significant.'']
+
+% --- Figure: AUROC vs F1 (placed here as in .md line 171) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{03_auroc_vs_f1_scatter.png}
+    \caption{AUROC vs.\ F1 Score across detection papers.}
+    \label{fig:auroc_f1_2}
+\end{figure}
+
+\subsection{Module 2: Learner Support}
+
+[PASTE HERE --- MODULE 2 INTRO: ``This is not an output confidence score but rather than outputting a bare confidence score TRUE-GUARD would give its detection indicators as explanations based upon the four dimensions of Herrera [8]:'']
+
+Use bullet points in Word for these 4 items:
+
+\begin{itemize}
+    \item [PASTE --- Bullet 1: ``The token-level trust markers indicate to the user the words or phrases...'']
+    \item [PASTE --- Bullet 2: ``The contrastive rationales describe what the model has taken into account...'']
+    \item [PASTE --- Bullet 3: ``Signal attribution informs the user of what detector fired the alarm...'']
+    \item [PASTE --- Bullet 4: ``The context-adaptive presentation varies the depth of explanation...'']
+\end{itemize}
+
+\subsection{Module 3: Closed-Loop Mitigation}
+
+[PASTE HERE --- MODULE 3 INTRO: ``At a certain point when risk goes beyond a limit, the system would react in phases:'']
+
+% --- Figure: ExpandR (placed here as in .md line 184) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{09_expandr_retrieval_ndcg.png}
+    \caption{ExpandR retrieval performance (NDCG@10) across four benchmarks. Joint LLM + retriever optimisation consistently outperforms all baselines (Source: Paper 20).}
+    \label{fig:expandr}
+\end{figure}
+
+% --- Figure: BehCal-RL (placed here as in .md line 187) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{10_behcal_calibration_ece.png}
+    \caption{BehCal-RL calibration quality (ECE vs.\ Accuracy). BehCal-RL applied to a 4B parameter model achieves lower ECE (better calibration) than GPT-4o, demonstrating calibration as a learnable meta-skill (Source: Paper 15).}
+    \label{fig:behcal}
+\end{figure}
+
+Use bullet points in Word for these 3 items:
+
+\begin{itemize}
+    \item [PASTE --- Bullet 1: ``Retrieval-augmented grounding Query a knowledge base...ExpandR [20], but query only the flagged claims not everybody.'']
+    \item [PASTE --- Bullet 2: ``Calibrated abstinence: When the uncertainty cannot be determined...what the model knows and what it does not.'']
+    \item [PASTE --- Bullet 3: ``Feedback loop: Feedback indicates are sent back into the training...the system improves itself.'']
+\end{itemize}
+
+\subsection{Module 4: Evaluation of Trust-Awarening}
+
+[PASTE HERE --- MODULE 4: ``Based on the TrustLLM [3] and the faithfulness assessment efforts made by Jing et al. [10]...'' to ``...the trust that the users themselves have when using the system.'']
+
+% =============================================================================
+% VI. FUTURE RESEARCH DIRECTIONS
+% =============================================================================
+\section{Future Research Directions}
+\label{sec:future}
+
+[PASTE HERE --- FUTURE INTRO: ``We wrap up the substantive section of this review...'' to ``...task-conditional routing.'']
+
+[PASTE HERE --- ``plausible directions, empirical comparisons between types of hallucinations...'' to ``...practical design principles.'']
+
+Each direction below should be a BOLD heading followed by the paragraph in Word:
+
+\textbf{Multimodal hallucination.} [PASTE HERE: ``It has been demonstrated by HALLUSHIFT++ [16]...'' to ``...researched in multi-signal detection.'']
+
+\textbf{Online calibration.} [PASTE HERE: ``Wu et al. [15] have shown that calibration is transferred...'' to ``...is an open question.'']
+
+\textbf{Personalized trust.} [PASTE HERE: ``Individuals vary in how they react...'' to ``...as enacted by Herrera [8].'']
+
+\textbf{Safety guarantees.} [PASTE HERE: ``Introducing empirical methods of UQ...'' to ``...the most demanding deployment settings.'']
+
+\textbf{Privacy-preserving detection.} [PASTE HERE: ``Distributing detection systems among institutions...'' to ``...have been pursued in the present context.'']
+
+\textbf{Scaling to very large models.} [PASTE HERE: ``Solutions like SEPs [14] and MHAD [5]...'' to ``...a small increment in overhead can be significant.'']
+
+\textbf{Closing the black-box gap.} [PASTE HERE: ``As long as there exists a quality difference...'' to ``...is a viable priority.'']
+
+% =============================================================================
+% VII. CONCLUSION
+% =============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+[PASTE HERE --- CONCLUSION PARA 1: ``The field that we are trying to make sense of...'' to ``...regarding the hallucination.'']
+
+[PASTE HERE --- CONCLUSION PARA 2: ``What was made evident during this review...'' to ``...nearly entirely apart.'']
+
+[PASTE HERE --- CONCLUSION PARA 3: ``We introduced TRUEGUARD as a methodology of consideration...'' to ``...not at this point worked much together.'']
+
+[PASTE HERE --- CONCLUSION PARA 4: ``It is obvious to us that the issue of hallucination...'' to ``...make such connections a bit clearer.'']
+
+% =============================================================================
+% REFERENCES (already filled — DO NOT EDIT in Word)
+% =============================================================================
+\begin{thebibliography}{20}
+
+\bibitem{su2024mind}
+W. Su, C. Wang, Q. Ai, Y. Hu, Z. Wu, Y. Zhou, and Y. Liu,
+``Unsupervised real-time hallucination detection based on the internal states of large language models,''
+Dept. Comput. Sci. Technol., Tsinghua University, 2024.
+
+\bibitem{zhang2024prism}
+F. Zhang, P. Yu, B. Yi, B. Zhang, T. Li, and Z. Liu,
+``Prompt-guided internal states for hallucination detection of large language models,''
+Nankai University, 2024.
+
+\bibitem{huang2024trustllm}
+Y. Huang, L. Sun, H. Wang, S. Wu, Q. Zhang et al.,
+``TrustLLM: Trustworthiness in large language models,''
+Multi-Institutional Collaboration, 2024.
+
+\bibitem{ma2024semantic}
+H. Ma, J. Pan, J. Liu, Y. Chen, J. T. Zhou, G. Wang, Q. Hu, H. Wu, C. Zhang, and H. Wang,
+``Semantic energy: Detecting LLM hallucination beyond entropy,''
+Tianjin University and Baidu Inc., 2024.
+
+\bibitem{zhang2024mhad}
+L. Zhang, D. Song, Z. Wu, Y. Tian, C. Zhou, J. Xu, Z. Yang, and S. Zhang,
+``Detecting hallucination in large language models through deep internal representation analysis,''
+Beijing Institute of Technology, 2024.
+
+\bibitem{anon2025entropy}
+Anonymous,
+``Entropy spike detection and self-confidence calibration for hallucination mitigation,''
+Extended Abstract, 2025.
+
+\bibitem{kang2025uq}
+S. Kang, Y. F. Bakman, D. N. Yaldiz, B. Buyukates, and S. Avestimehr,
+``Uncertainty quantification for hallucination detection in large language models: Foundations, methodology, and future directions,''
+Univ. Southern California, Oct. 2025.
+
+\bibitem{herrera2025xai}
+F. Herrera,
+``Making sense of the unsensible: Reflection, survey, and challenges for XAI in large language models toward human-centered AI,''
+Univ. Granada and ADIA Lab, May 2025.
+
+\bibitem{hajji2024map}
+E. Hajji, A. Bouguerra, and F. Arnez,
+``The map of misbelief: Tracing intrinsic and extrinsic hallucinations through attention patterns,''
+Universit\'{e} Paris-Saclay, CEA-List, 2024.
+
+\bibitem{jing2025faith}
+X. Jing, S. Billa, and D. Godbout,
+``On a scale from 1 to 5: Quantifying hallucination in faithfulness evaluation,''
+in \textit{Findings Assoc. Comput. Linguistics: NAACL 2025}, pp. 7780--7795, 2025.
+
+\bibitem{anon2025rauq}
+Anonymous,
+``Efficient hallucination detection for LLMs using uncertainty-aware attention heads,''
+Under review at ICLR 2026, 2025.
+
+\bibitem{sriramanan2024llmcheck}
+G. Sriramanan, S. Bharti, V. S. Sadasivan, S. Saha, P. Kattakinda, and S. Feizi,
+``LLM-Check: Investigating detection of hallucinations in large language models,''
+Univ. Maryland, 2024.
+
+\bibitem{dasgupta2024hallushift}
+S. Dasgupta, S. Nath, A. Basu, P. Shamsolmoali, and S. Das,
+``HALLUSHIFT: Measuring distribution shifts towards hallucination detection in LLMs,'' 2024.
+
+\bibitem{kossen2024sep}
+J. Kossen, J. Han, M. Razzak, L. Schut, S. Malik, and Y. Gal,
+``Semantic entropy probes: Robust and cheap hallucination detection in LLMs,''
+Univ. Oxford, 2024.
+
+\bibitem{wu2025behcal}
+J. Wu, J. Liu, Z. Zeng, T. Zhan, T. Cai, and W. Huang,
+``Mitigating LLM hallucination via behaviorally calibrated reinforcement learning,''
+ByteDance Seed and Carnegie Mellon Univ., 2025.
+
+\bibitem{nath2024hallushift}
+S. Nath, A. Basu, S. Dasgupta, and S. Das,
+``HALLUSHIFT++: Bridging language and vision through internal representation shifts for hierarchical hallucinations in MLLMs,'' 2024.
+
+\bibitem{moslonka2024epr}
+C. Moslonka, H. Randrianarivo, A. Garnier, and E. Malherbe,
+``Learned hallucination detection in black-box LLMs using token-level entropy production rate,''
+Artefact Research Center, CentraleSup\'{e}lec, 2024.
+
+\bibitem{alansari2024survey}
+A. Alansari and H. Luqman,
+``Large language models hallucination: A comprehensive survey,''
+KFUPM, 2024.
+
+\bibitem{sharma2024trust}
+M. Sharma, H. C. Siu, R. Paleja, and J. D. Pe\~{n}a,
+``Why would you suggest that? Human trust in language model responses,''
+MIT Lincoln Laboratory, 2024.
+
+\bibitem{yao2025expandr}
+S. Yao, P. Huang, Z. Liu, Y. Gu, Y. Yan, S. Yu, and G. Yu,
+``ExpandR: Teaching dense retrievers beyond queries with LLM guidance,''
+in \textit{Proc. EMNLP 2025}, pp. 19036--19054, 2025.
+
+\end{thebibliography}
+
+\end{document}

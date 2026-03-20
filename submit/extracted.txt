@@ -11,12 +11,12 @@ ing. Models based on systems such as GPT-4, LLaMA and Mistral can now compose le
 
 
 Manuscript received February 2026.
-Yogesh Ravi M is with the Department of Computer Science, Vellore Institute of Technology (VIT) Chennai, Tamil Nadu, India (e-mail: yo- geshravi4343@gmail.com).
+Yogesh Ravi M is with the Department of Computer Science, Vellore Institute of Technology (VIT) Chennai, Tamil Nadu, India (e-mail: yogeshravi4343@gmail.com).
 Pradeep Kumar T S is with the Department of Computer Science, Vellore Institute of Technology (VIT) Chennai, Tamil Nadu, India.
 
 But as every one who has ever handled these models can make out, there is a dyspeptic weakness about them, which is that they sometimes invent. The technical word is hallucination, and it can simply be defined as the propensity of LLMs to produce text, which reads well, i.e. it makes sense grammatical, confident, logically organized and is merely incorrect [7], [18]. A model could quote a paper which does not exist, fabricate a historical incident or make a bold lie about a drug interaction. What is so dangerous about that is that even the content that is hallucinated may appear as the normal output to an untrained eye [19]. In the medical, legal, or financial domain where it is applied in high stakes, this is not merely inconvenient, but can be detrimental [3].
 
-
+ 
 R Plot: Intrinsic vs extrinsic hallucination (Paper 9).
 
 The community of research has of course mobilized. A group of researchers has instead looked to introspection into the model itself, examining the activations of hidden layers and interior representations of indicative symptoms that something has gone amiss during generation [1], [2], [5], [13]. Still others have taken an information-theoretic perspective where they quantify the amount of uncertainty or confusion that the model appears to have on its own outputs [4], [14], [17]. Another body of evidence has investigated the change in the attention mechanism of the model as it starts to produce fabrications, as hallucinating models tend to break their attention to the evidence presented to that evidence [9], [11]. Other researchers in the meantime are working on the mitigation end, by training models to be able to say I don’t know rather than guess, [6], [15], or basing outputs on retrieved documents and hence the model has something real to lean on [20]. Then there is the human aspect of this: how do we explain to users the way the model is working, how do we establish the level of trust, which responsible deployment requires [8], [19]?
@@ -48,7 +48,7 @@ What this pillar tells us. Together, all six articles start a counterargument th
 B.	Pillar 2: Uncertainty Quantification and Entropy-Based Methods
 This is where the first pillar examines what the model itself is thinking internally, whereas this one examines the degree to which the model itself is certain or uncertain with what it is saying. Uncertainty quantification Mathematics There are principled methods of quantifying uncertainty to mark outputs which the underlying model is not confident about.
 
-
+ 
 R Plot: SEP vs Semantic Entropy (Paper 14).
 Principles of UQ in LLMs Kang et al. [7] compile what is, to the best of our knowledge, the most comprehensive list of foundations of the application of uncertainty quantification to LLMs of a specific kind. They go through the traditional separation of epistemic uncertainty (the model lacks sufficient information to be certain) and aleatoric uncertainty (the question is actually ambiguous), and then follow the ways these notions have been rethought as applied to the special circumstances of autoregressive language generation. Their division of the methods into confidence-based, sampling- based and ensemble-based families provides a handy map of it. More productively, perhaps, they are straightforward with the outstanding issues: most UQ approaches are computationally intensive, have sub-optimal inter-domain transfer, and make unwell-calibrated confidence estimates.
 Semantic Energy: This is a subtlety which Ma et al. [4] have observed: normal semantic entropy involves probabilities which have already been run through the softmax tragedy, which in fact conceals how uncertain the model is. Two actually quite different logit distributions can give similar-looking probability distributions after softmax. Semantic Energy is an algorithm that attempts directly to do what the penultimate layer specifies by optimizing a Boltzmann-based energy formu- lation of what the model thinks to be true will happen before probability balancing brings smoothness to things. The consequence is a set of uncertainty estimates that are more knowledgeable of true model confusion especially in such instances where semantic entropy is producing the meaningfully hiss of confidently read indications.
@@ -59,7 +59,7 @@ What this pillar tells us. All the three articles demonstrate that, when measure
 Pillar 3: Attention-Detection.
 At their fundamental level, transformers are attention machineries. Each token produced is a weighted combination of information of all the previous tokens. And as a model begins to fabriculate these weight changes in characteristic manners--and a number of researchers have ascertained how to read through those changes.
 
-
+ 
 R Plot: LLM-Check (Paper 12) variants — speedup vs AUROC.
 We believe that it is an area that has been slightly overlooked, which has been made by the Map of Misbelief: Hajji et al. [9]. They introduce visibility into the division between intrinsic and extrinsic hallucinations (when the model contradicts itself), and extrinsic hallucinations (when the model simply builds new information with no foundation whatsoever). This is important since the two kinds of hallucination need quite different detection strategies as demonstrated by their experiments. Sampling-based methods such as semantic entropy perform well in picking up extrinsics but the intrinsic hallucinations are not well suited by such methods. Inverting it, their attention-based aggregation of input tokens proved to be significantly more adapted to intrinsic hallucinations. This complementarity is a weakness into which the idea that multi- signal approaches should be necessary and not just nice to have can be utilized.
 RAUQ: The authors of RAUQ [11] never identified themselves, finding in the anonymous text something particular and practical: some attention heads in the transformer that they refer to as the uncertainty-conscious heads act differently when the model is hallucinating. In particular, these heads de-emphasize past context tokens to a near observer that the model is turning its back to the evidence. RAUQ recognises these heads automatically and collapses their behavior into a repetitive scoring scheme giving rise to a sequence-level uncertainty estimation. The entire process supplements on a single forward pass and they evaluate it on twelve tasks and four LLMs. That analysis has a very broad spectrum and it is encouraging; it indicates the potential that this is not a construct of a specific model or data set.
@@ -70,10 +70,10 @@ What this pillar tells us. Hallucination analysis is a poorly exploited field us
 C.	Pillar 4: Evaluation and Benchmarking
 The thesaurus of any body of research is good benchmarks. It is difficult to determine whether a new method is really better or if it is just tested in a good environment without their presence.
 
-
+ 
 R Plot: TrustLLM (Paper 3) — trustworthiness dimensions.
 
-
+ 
 R Plot: Improvement over baseline across papers.
 TrustLLM: Huang et al. [3] considered trustworthiness being a multi-dimensional issue. They do not analyze hallucination but consider the eight dimensions of truthfulness, safety, fairness, robustness, privacy, machine ethics, transparency, and accountability when assessing LLCM. They have experimented with sixteen mainstream models on over thirty datasets and some of their results are worth consideration. Reliability and brute strength also move in a coercive manner- more reliable models are usually more appreciable and it is positive. There is still a narrowing of the gap in proprietary models in the majority of trust dimensions. And with a warning: excessive vigor in safety filtering may indeed have a backfiring effect in that the model seemed to cause the rejection of rightful requests, which should undermine the trust that it aims to establish.
 Faithfulness Evaluation: Jing et al. [10] base the evaluation problem on industrial reality. As they worked on travel-domain data at Expedia, they created templates of rubrics to use LLMs as judges of faithfulness, where generated content is produced and graded on one of a number of measured scales. Also, they addressed the data issue itself by coming up with techniques to create synthetic unfaith- ful data, which can subsequently be used to train or fine-tune NLI models. Their experimental work reveals that GPT-4 makes surprisingly accurate and better explained judgments of faithfulness and experimental exploitation of NLI models fine tuned on the synthetic data to display actual improvements in performance. It is applicable practice and the discipline requires additional practice.
@@ -91,7 +91,7 @@ What this pillar tells us. The process of mitigation is not only detection of ba
 E.	Pillar 6: Explainability and Human Trust
 All the above is geared towards the end result that people should be able to trust the results of LLM. That will demand more than technical reliability and will also be based on transparency. Users must know when and why they can and cannot trust what the model is telling them.
 
-
+ 
 R Plot: Human trust framing effect (Paper 19).
 
 XAI of LLMs: Herrera [8] steps out of methodological details and poses this question: what is the meaning of it even when an LLM explanation is deemed to be good? It will depend on the questioner. Herrera pinpoints four dimensions of concern, namely; faithfulness (is the explanation what the model did?), truthfulness (is the explanation factually accurate?), plausibility (is the explanation understandable to a human?), and contrastivity (is the explanation why the model made this choice and not that one). These dimensions do not necessarily coincide. An ideal honest explanation of the 96-head attention mechanism of a transformer would be honest but quite impossible to the majority of users. One may say a simplification which is rather an unfaithful representation of the process of the model. These tensions, Herrera alludes to, are the main design problem facing XAI in the LLM age.
@@ -121,6 +121,18 @@ The most notable weakness, perhaps: each detection system produces a number or a
 TABLE I
 COMPARATIVE ANALYSIS OF HALLUCINATION DETECTION METHODS
 
+Method	Signal Type	Model Access	Extra Passes	Supervision	Intrinsic	Extrinsic
+MIND [1]	Internal States	White-box	0	Unsupervised	Moderate	Moderate
+PRISM [2]	Internal States	White-box	0	Supervised	Good	Moderate
+MHAD [5]	Internal States	White-box	0	Supervised	Moderate	Good
+SEPs [14]	Internal States	White-box	0	Supervised	Good	Good
+HALLUSHIFT [13]	Dist. Shift	White-box	0	Unsupervised	Good	Moderate
+HALLUSHIFT++ [16]	Dist. Shift	White-box	0	Unsupervised	Good	Moderate
+Semantic Energy [4]	Logit Entropy	White-box	0	Unsupervised	Weak	Strong
+EPR [17]	Token Entropy	Black-box	0	Supervised	Weak	Moderate
+Map of Misbelief [9]	Attention	White-box	0	Unsupervised	Strong	Weak
+RAUQ [11]	Attention	White-box	0	Unsupervised	Strong	Moderate
+LLM-Check [12]	Multi-signal	Both	0–1	Both	Good	Good
 
 
 IV.	IDENTIFIED RESEARCH GAPS
@@ -143,7 +155,7 @@ Sharma et al. [19] demonstrated that the same explanations, despite having them 
 TRUEGUARD: A PROPOSED CONCEPTUAL FRAMEWORK
 The gaps that we have identified are directed towards a certain type of system. We refer to it as TRUEGUARD (Trustworthy, Unified, Real-time, Explainable Guard) and provide it as a conceptual map motion picture of how multi-signal detection, explain- ability and mitigation may be connected to each other. It has four modules.
 
-
+ 
 R Plot: Cross-paper numerical comparison (summary).
 
 This module serves to detect the occurrence of multiple signals at the same time that might correspond to the object under consideration.<|human|>Module 1: Multi-Signal Detector This module will be used to monitor the presence of more than one signal at a given time that may relate to the object of interest.
@@ -155,7 +167,7 @@ Entropy-Energy Monitoring Entropy-energy monitors using logit-level analysis of 
 Distribution Distribution Shift, according to HALLUSHIFT [13] and HALLUSHIFT++ [16], to observe a gradual factual drift that single-step methods could be unaware of.
 Such works would be read into an acquired seat union stratum that dynamically weights those indications with regards to the task being performed. Since all four signals are obtained out of the already-computed (data) during the forward pass (hidden states, weight of attention, logits), no further overhead would be significant.
 
-
+ 
 R Plot: AUROC vs F1 across detection papers.
 
 Module 3: Learner Support.
@@ -168,10 +180,10 @@ The context-adaptive presentation varies the depth of explanation according to S
 Module 4: Virtual Domestic violence Panels.
 At a certain point when risk goes beyond a limit, the system would react in phases:
 
-
+ 
 R Plot: ExpandR retrieval performance (Paper 20).
 
-
+ 
 R Plot: Behaviorally calibrated RL (Paper 15) — calibration quality.
 
 Retrieval-augmented grounding Query a knowledge base with jointly optimized retrieval in style of ExpandR [20], but query only the flagged claims not everybody.
