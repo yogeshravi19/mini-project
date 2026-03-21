@@ -41,7 +41,7 @@ But as every one who has ever handled these models can make out, there is a dysp
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/08_intrinsic_vs_extrinsic_hallucination.png}
-\caption{Intrinsic vs extrinsic hallucination (Paper 9).}
+\caption{Detecting intrinsic versus extrinsic hallucinations using different signal types. Semantic Entropy performs well on extrinsic hallucinations (fabricated facts), while attention-based aggregation is more effective at catching intrinsic ones (self-contradictions). This complementarity motivates our multi-signal fusion approach.}
 \end{figure}
 
 The community of research has of course mobilized. A group of researchers has instead looked to introspection into the model itself, examining the activations of hidden layers and interior representations of indicative symptoms that something has gone amiss during generation [1], [2], [5], [13]. Still others have taken an information-theoretic perspective where they quantify the amount of uncertainty or confusion that the model appears to have on its own outputs [4], [14], [17]. Another body of evidence has investigated the change in the attention mechanism of the model as it starts to produce fabrications, as hallucinating models tend to break their attention to the evidence presented to that evidence [9], [11]. Other researchers in the meantime are working on the mitigation end, by training models to be able to say I don't know rather than guess, [6], [15], or basing outputs on retrieved documents and hence the model has something real to lean on [20]. Then there is the human aspect of this: how do we explain to users the way the model is working, how do we establish the level of trust, which responsible deployment requires [8], [19]?
@@ -87,7 +87,7 @@ This is where the first pillar examines what the model itself is thinking intern
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/07_sep_vs_semantic_entropy.png}
-\caption{SEP vs Semantic Entropy (Paper 14).}
+\caption{Per-model AUROC comparison between Semantic Entropy Probes (SEP) and the standard multi-pass Semantic Entropy baseline across four LLMs. SEP consistently outperforms the baseline while requiring roughly 8$\times$ fewer inference passes, making it both more accurate and more practical for deployment.}
 \end{figure}
 
 Principles of UQ in LLMs Kang et al.\ [7] compile what is, to the best of our knowledge, the most comprehensive list of foundations of the application of uncertainty quantification to LLMs of a specific kind. They go through the traditional separation of epistemic uncertainty (the model lacks sufficient information to be certain) and aleatoric uncertainty (the question is actually ambiguous), and then follow the ways these notions have been rethought as applied to the special circumstances of autoregressive language generation. Their division of the methods into confidence-based, sampling-based and ensemble-based families provides a handy map of it. More productively, perhaps, they are straightforward with the outstanding issues: most UQ approaches are computationally intensive, have sub-optimal inter-domain transfer, and make unwell-calibrated confidence estimates.
@@ -107,7 +107,7 @@ We believe that it is an area that has been slightly overlooked, which has been 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/11_llmcheck_variants.png}
-\caption{LLM-Check (Paper 12) variants: speedup vs AUROC.}
+\caption{Trade-off between inference speedup and detection accuracy for the three LLM-Check variants. The full white-box setting achieves the highest AUROC (93.4\%), while the black-box approximation trades a modest drop in accuracy for a 450$\times$ speedup over multi-sampling baselines, highlighting a practical path toward real-time hallucination detection.}
 \end{figure}
 
 RAUQ: The authors of RAUQ [11] never identified themselves, finding in the anonymous text something particular and practical: some attention heads in the transformer that they refer to as the uncertainty-conscious heads act differently when the model is hallucinating. In particular, these heads de-emphasize past context tokens to a near observer that the model is turning its back to the evidence. RAUQ recognises these heads automatically and collapses their behavior into a repetitive scoring scheme giving rise to a sequence-level uncertainty estimation. The entire process supplements on a single forward pass and they evaluate it on twelve tasks and four LLMs. That analysis has a very broad spectrum and it is encouraging; it indicates the potential that this is not a construct of a specific model or data set.
@@ -123,13 +123,13 @@ The thesaurus of any body of research is good benchmarks. It is difficult to det
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/06_trustllm_dimensions.png}
-\caption{TrustLLM (Paper 3): trustworthiness dimensions.}
+\caption{Scores across the eight TrustLLM trustworthiness dimensions for proprietary (GPT-4 class), strong open-source (Llama-3 70B), and average open-source models. Proprietary models lead on every dimension, but the gap is narrowest for safety and ethics, suggesting that open-source alignment efforts have been especially effective in those areas.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/04_improvement_over_baseline.png}
-\caption{Improvement over baseline across papers.}
+\caption{Percentage improvement each reviewed method achieves over its respective strongest reported baseline. Human Trust (Paper~19) and BehCal-RL (Paper~15) show the largest gains, which is notable because both operate at the calibration and explainability level rather than purely on detection signals.}
 \end{figure}
 
 TrustLLM: Huang et al.\ [3] considered trustworthiness being a multi-dimensional issue. They do not analyze hallucination but consider the eight dimensions of truthfulness, safety, fairness, robustness, privacy, machine ethics, transparency, and accountability when assessing LLCM. They have experimented with sixteen mainstream models on over thirty datasets and some of their results are worth consideration. Reliability and brute strength also move in a coercive manner---more reliable models are usually more appreciable and it is positive. There is still a narrowing of the gap in proprietary models in the majority of trust dimensions. And with a warning: excessive vigor in safety filtering may indeed have a backfiring effect in that the model seemed to cause the rejection of rightful requests, which should undermine the trust that it aims to establish.
@@ -159,7 +159,7 @@ All the above is geared towards the end result that people should be able to tru
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/12_human_trust_framing.png}
-\caption{Human trust framing effect (Paper 19).}
+\caption{Effect of explanation framing on user trust and hallucination detection rate. Adding explanations yields only a marginal improvement in isolated evaluation, but produces a substantial 22-percentage-point boost in trust when users can compare model outputs side by side. This underscores that how explanations are presented matters as much as whether they are provided at all.}
 \end{figure}
 
 XAI of LLMs: Herrera [8] steps out of methodological details and poses this question: what is the meaning of it even when an LLM explanation is deemed to be good? It will depend on the questioner. Herrera pinpoints four dimensions of concern, namely; faithfulness (is the explanation what the model did?), truthfulness (is the explanation factually accurate?), plausibility (is the explanation understandable to a human?), and contrastivity (is the explanation why the model made this choice and not that one). These dimensions do not necessarily coincide. An ideal honest explanation of the 96-head attention mechanism of a transformer would be honest but quite impossible to the majority of users. One may say a simplification which is rather an unfaithful representation of the process of the model. These tensions, Herrera alludes to, are the main design problem facing XAI in the LLM age.
@@ -196,7 +196,7 @@ RAUQ [11] & Attention & White-box & 0 & Unsupervised & Strong & Moderate\\
 LLM-Check [12] & Multi-signal & Both & 0--1 & Both & Good & Good\\
 \bottomrule
 \end{tabular}
-\caption{Comparative analysis of hallucination detection methods.}
+\caption{Side-by-side comparison of hallucination detection methods reviewed in this survey. Each row summarises the detection signal used, the primary benchmark, and the reported AUROC and F1 scores. Dashes indicate values not reported in the original study.}
 \end{table}
 
 The Efficiency Question.
@@ -242,7 +242,7 @@ The gaps that we have identified are directed towards a certain type of system. 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/00_combined_summary_4panel.png}
-\caption{Cross-paper numerical comparison (summary).}
+\caption{Combined four-panel summary of cross-paper numerical comparisons. Top-left: AUROC on the HaluEval benchmark for nine detection papers. Top-right: SEP versus Semantic Entropy across four LLMs. Bottom-left: detection effectiveness by hallucination type. Bottom-right: percentage improvement over baselines for all reviewed methods.}
 \end{figure}
 
 Module 1: Multi-Signal Detector. This module will be used to monitor the presence of more than one signal at a given time that may relate to the object of interest.
@@ -259,7 +259,7 @@ Such works would be read into an acquired seat union stratum that dynamically we
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/03_auroc_vs_f1_scatter.png}
-\caption{AUROC vs F1 across detection papers.}
+\caption{Scatter plot of AUROC against F1 score for all detection-focused papers. Point size reflects the inference speedup factor (log-scaled), and colour encodes the type of detection signal. Methods in the upper-right corner, particularly SEP and LLM-Check, offer both high accuracy and practical efficiency.}
 \end{figure}
 
 Module 3: Learner Support.
@@ -277,13 +277,13 @@ At a certain point when risk goes beyond a limit, the system would react in phas
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/09_expandr_retrieval_ndcg.png}
-\caption{ExpandR retrieval performance (Paper 20).}
+\caption{NDCG@10 retrieval performance of ExpandR compared with three baselines across four standard benchmarks. Joint optimisation of the LLM query-expansion module and the retriever yields consistent gains, with the largest margin observed on the Natural Questions dataset.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{R_Plotscol/10_behcal_calibration_ece.png}
-\caption{Behaviorally calibrated RL (Paper 15) --- calibration quality.}
+\caption{Expected Calibration Error (ECE) plotted against task accuracy for BehCal-RL and three reference methods. Lower ECE indicates better-calibrated confidence estimates. BehCal-RL achieves the lowest ECE across all three benchmarks while maintaining accuracy competitive with standard RLVR, demonstrating that well-calibrated uncertainty need not come at the expense of task performance.}
 \end{figure}
 
 \begin{itemize}
