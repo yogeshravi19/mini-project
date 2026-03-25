@@ -22,7 +22,11 @@
 \corrauthor[1]{Yogesh Ravi M}{yogeshravi4343@gmail.com}
 
 \begin{abstract}
-Large Language Models (LLMs) have demonstrated a set of capabilities in natural language processing that has never been seen before, but their usage in safety-sensitive areas remains fundamentally and irrevocably hindered as in the phenomenon of hallucination, the creation of factually inaccurate but fluent text. An ever-increasing range of literature has been generated to combat this difficulty by diversity and complementary methods, such as internal state evaluation, uncertainty quantification, attention-based monitoring, detection of distribution shift, retrieval-augmented generative generation, reinforcement learning-based calibration, and human-centered explainability. Nonetheless the directions of research developed have to a considerable extent remained largely one-dimensional with little cross-pollination of thought and no single point of view on how they can contribute to each other. The paper is a loose survey of twenty current and impactful sources on hallucinations detection, mitigation, and trustworthiness in LLMs. We build a respectable amount of literature into a structured taxonomy on themes of pillars---six based on internal state mean detection, (1) uncertainty quantification and entropy-based detectors, (2) attention-based detectors (here) and (1) evaluation and benchmarking, (2) mitigation through calibration and retrieval augmentation, and (3) explainability and human trust. On a pillar-by-pillar basis, we examine both fundamental methodologies and major contributions and limitations. We also compare and contrast among the methods and uncover essential gaps in research such as signal isolation, detection-mitigation disconnection, and lack of trust calibration, which are yet to be subdued. Lastly, we present TRUEGUARD, a theoretical model of integrating multi-signal hallucination detection with user-friendly explainable technology and closed-loop correction, and give the prospects of future promising research on the way towards truly trustworthy use of LLM.
+Large Language Models (LLMs) deliver strong performance across natural language tasks, but reliable deployment in high-stakes domains is still constrained by hallucinations: fluent outputs that are factually incorrect. Recent work addresses this challenge through multiple directions, including internal-state monitoring, uncertainty quantification, attention-pattern analysis, distribution-shift tracking, retrieval-augmented mitigation, reinforcement-learning calibration, and explainable AI. However, these directions are often studied in isolation, with limited integration across detection, mitigation, and user trust.
+
+This paper presents a structured review of twenty influential works and organizes them into six thematic pillars: internal-state detection, uncertainty and entropy methods, attention-based detection, evaluation and benchmarking, mitigation through calibration and retrieval, and explainability with human trust. For each pillar, we summarize core methods, key findings, and practical limitations. We then perform a cross-pillar comparison and identify five unresolved gaps: signal isolation, computational overhead, weak detection--mitigation coupling, explainability deficit, and trust-calibration mismatch.
+
+Based on these findings, we propose TRUEGUARD, a conceptual framework that combines multi-signal detection, user-facing explanations, and closed-loop mitigation. TRUEGUARD is intended as a roadmap for building trustworthy hallucination-aware LLM systems that are both technically robust and operationally deployable.
 \end{abstract}
 
 \begin{document}
@@ -262,8 +266,8 @@ Such works would be read into an acquired seat union stratum that dynamically we
 \caption{Scatter plot of AUROC against F1 score for all detection-focused papers. Point size reflects the inference speedup factor (log-scaled), and colour encodes the type of detection signal. Methods in the upper-right corner, particularly SEP and LLM-Check, offer both high accuracy and practical efficiency.}
 \end{figure}
 
-Module 3: Learner Support.
-This is not an output confidence score but rather than outputting a bare confidence score TRUEGUARD would give its detection indicators as explanations based upon the four dimensions of Herrera [8]:
+Module 2: Explainability Engine.
+Rather than outputting only a raw confidence score, TRUEGUARD converts detection indicators into user-facing explanations aligned with Herrera's four XAI dimensions [8]:
 \begin{itemize}
 \item The token-level trust markers indicate to the user the words or phrases that are particularly risky, which are based on the per-token risk scores.
 \item The contrastive rationales describe what the model has taken into account but discarded based on the attention patterns and the alternative-token distribution as evidence.
@@ -271,8 +275,8 @@ This is not an output confidence score but rather than outputting a bare confide
 \item The context-adaptive presentation varies the depth of explanation according to Sharma et al.\ [19] discovery that explanation skills vary in comparative and independent evaluation contexts.
 \end{itemize}
 
-Module 4: Virtual Domestic violence Panels.
-At a certain point when risk goes beyond a limit, the system would react in phases:
+Module 3: Closed-Loop Mitigation.
+When risk exceeds a defined threshold, the system responds in phases:
 
 \begin{figure}[H]
 \centering
@@ -287,13 +291,13 @@ At a certain point when risk goes beyond a limit, the system would react in phas
 \end{figure}
 
 \begin{itemize}
-\item Retrieval-augmented grounding Query a knowledge base with jointly optimized retrieval in style of ExpandR [20], but query only the flagged claims not everybody.
-\item Calibrated abstinence: When the uncertainty cannot be determined, use behavioral calibration [15] to deliver an honest response telling what the model knows and what it does not.
-\item Feedback loop: Feedback indicates are sent back into the training through the fine-grained reward shaping [6], [15], in this way the system improves itself.
+\item Retrieval-augmented grounding: Query a knowledge base using ExpandR-style joint retrieval-generation optimization [20], but only for claims flagged as high-risk.
+\item Calibrated abstention: If uncertainty remains high, apply behaviorally calibrated policies [15] so the model states uncertainty explicitly instead of fabricating.
+\item Feedback loop: Feed detector outcomes back into training with fine-grained reward shaping [6], [15], so calibration and reliability improve over time.
 \end{itemize}
 
-Module 4a: Evaluation of Trust-Awarening.
-Based on the TrustLLM [3] and the faithfulness assessment efforts made by Jing et al.\ [10], the evaluation module would not only trace the accuracy of the detection but also the quality of the explanation offered by the system, the effectiveness of mitigation, and the overall correspondence between the trust scores produced by the system and the trust that the users themselves have when using the system.
+Module 4: Trust-Aware Evaluation.
+Building on TrustLLM [3] and faithfulness-evaluation practices from Jing et al.\ [10], this module measures not only detection accuracy but also explanation quality, mitigation effectiveness, and alignment between system confidence and observed user trust.
 
 \section*{Future Research Directions}
 

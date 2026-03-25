@@ -43,7 +43,7 @@ hr_plot <- ggplot(metrics_data, aes(x = Model, y = Hallucination_Rate_Percent, f
   geom_text(aes(label = paste0(Hallucination_Rate_Percent, "%")), vjust = -0.5, fontface = "bold")
 
 # 4. Save the plots to the CAPSTONE directory
-ggsave("d:/MINI PROJECT/CAPSTONE/F1_Score_Comparison.png", plot = f1_plot, width = 10, height = 6, dpi = 300)
-ggsave("d:/MINI PROJECT/CAPSTONE/Hallucination_Rate_Comparison.png", plot = hr_plot, width = 10, height = 6, dpi = 300)
+ggsave("e:/MINI PROJECT/CAPSTONE/F1_Score_Comparison.png", plot = f1_plot, width = 10, height = 6, dpi = 300)
+ggsave("e:/MINI PROJECT/CAPSTONE/Hallucination_Rate_Comparison.png", plot = hr_plot, width = 10, height = 6, dpi = 300)
 
 print("Plots generated successfully and saved to d:/MINI PROJECT/CAPSTONE/ folder.")
