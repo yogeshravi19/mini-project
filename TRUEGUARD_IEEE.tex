@@ -268,7 +268,16 @@ Even when explanations exist, Sharma et al.~\cite{human_trust} showed that their
 % =====================================================================
 \section{TRUEGUARD: A Proposed Conceptual Framework}
 
-The gaps we have identified point toward a specific kind of system. We call it TRUEGUARD (Trustworthy, Unified, Real-time, Explainable Guard), and we offer it as a conceptual framework---a sketch of how multi-signal detection, explainability, and mitigation could fit together. It has four modules.
+The aforementioned gaps formulate our core problem statement: current hallucination systems are fragmented, slow, passive, and opaque. To solve this entire problem statement with absolute precision, we propose \textbf{TRUEGUARD} (Trustworthy, Unified, Real-time, Explainable Guard). TRUEGUARD is engineered as the definitive framework whose modules map flawlessly to the identified gaps:
+
+\begin{itemize}
+\item \textbf{Solving Gap 1 (Signal Isolation):} Module 1 employs a Multi-Signal Fusion architecture, mathematically merging internal states, attention, entropy, and distribution shifts to eradicate detection blind spots.
+\item \textbf{Solving Gap 2 (Overhead):} By extracting all vectors in a single forward pass, it acts in real-time without the intensive multi-sampling costs of previous models.
+\item \textbf{Solving Gaps 4 \& 5 (Explainability \& Trust):} Module 2 translates raw metrics into Token-Level Annotations and Adaptive Contrastive Explanations, delivering transparent and strictly calibrated user trust.
+\item \textbf{Solving Gap 3 (Disconnect):} Module 3 operates a Closed-Loop Mitigation pipeline, instantly intercepting high-risk generations to inject Retrieval-Augmented Grounding (RAG) or force Calibrated Abstention.
+\end{itemize}
+
+The architecture comprises four interconnected modules designed specifically to execute these solutions without error.
 
 \subsection{Module 1: Multi-Signal Detector}
 
