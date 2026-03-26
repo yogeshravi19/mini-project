@@ -47,7 +47,7 @@
 % =============================================================================
 \begin{abstract}
 \noindent
-Large Language Models (LLMs) have achieved unprecedented success in natural language understanding, generative reasoning, and complex task execution. However, their deployment in high-stakes domains is significantly impeded by the phenomenon of \textit{hallucination}—the confident generation of contextually fluent but factually incorrect or logically inconsistent text. Detecting these fabrications in real-time remains a formidable challenge. Current safety frameworks suffer from signal isolation, high computational latency overheads, severe explainability deficits, and a complete lack of active mitigation loops. To navigate these boundaries, this paper introduces TRUEGUARD (Trustworthy, Unified, Real-time, Explainable Guard), a comprehensive, inline mathematical tracking architecture operating natively within the standard LLM forward pass. TRUEGUARD systematically fuses four complementary data channels: Internal State Probes (ISP), Attention Anomaly Scores (AAS), Entropy-Energy Monitors (EEM), and Distribution Shift Trackers (DST). Through an adaptive, learned fusion gateway, the model dynamically predicts token-level fabrication risk. Furthermore, TRUEGUARD implements a novel closed-loop mitigation strategy leveraging targeted Retrieval-Augmented Grounding (RAG) combined with calibrated abstention protocols. Empirical evaluations across major factuality benchmarks exhibit that TRUEGUARD achieves an industry-leading 0.844 AUROC while reducing operational detection latency by $11.5\times$ compared to multi-sample semantic entropy baseline architectures. By successfully suppressing baseline hallucination rates by $63.8\%$ and converting opaque AI calculations into human-readable token trust markers, this framework provides a universally robust blueprint for transitioning theoretical generative models into trustworthy, production-ready AI systems.
+Large Language Models (LLMs) have achieved unprecedented success in natural language understanding, generative reasoning, and complex task execution. However, their deployment in high-stakes domains is significantly impeded by the phenomenon of \textit{hallucination}---the confident generation of contextually fluent but factually incorrect or logically inconsistent text. Detecting these fabrications in real-time remains a formidable challenge. Current safety frameworks suffer from signal isolation, high computational latency overheads, severe explainability deficits, and a complete lack of active mitigation loops. To navigate these boundaries, this paper introduces TRUEGUARD (Trustworthy, Unified, Real-time, Explainable Guard), a comprehensive, inline mathematical tracking architecture operating natively within the standard LLM forward pass. TRUEGUARD systematically fuses four complementary data channels: Internal State Probes (ISP), Attention Anomaly Scores (AAS), Entropy-Energy Monitors (EEM), and Distribution Shift Trackers (DST). Through an adaptive, learned fusion gateway, the model dynamically predicts token-level fabrication risk. Furthermore, TRUEGUARD implements a novel closed-loop mitigation strategy leveraging targeted Retrieval-Augmented Grounding (RAG) combined with calibrated abstention protocols. Empirical evaluations across major factuality benchmarks exhibit that TRUEGUARD achieves an industry-leading 0.844 AUROC while reducing operational detection latency by $11.5\times$ compared to multi-sample semantic entropy baseline architectures. By successfully suppressing baseline hallucination rates by $63.8\%$ and converting opaque AI calculations into human-readable token trust markers, this framework provides a universally robust blueprint for transitioning theoretical generative models into trustworthy, production-ready AI systems.
 \end{abstract}
 
 \noindent\textbf{Keywords:} Hallucination Detection; Large Language Models; TRUEGUARD; Explainable AI; Multi-signal Fusion; Trustworthy AI; Natural Language Processing
@@ -58,13 +58,13 @@ Large Language Models (LLMs) have achieved unprecedented success in natural lang
 \section{Introduction}
 \label{sec:introduction}
 
-Over the past decade, the rapid evolution and subsequent scaling of Large Language Models (LLMs) have irrevocably altered the digital computing landscape. Architectures such as GPT-4, LLaMA-2, and Mistral have crossed the threshold from academic curiosities to foundational engines driving modern software infrastructures. Because they are pre-trained on terabytes of human linguistic data, these models possess an intrinsic capacity to model complex statistical relationships, mimicking human reasoning processes capable of writing code, drafting legal opinions, and performing advanced medical diagnostic synthesis.
+Over the past decade, the rapid evolution and subsequent scaling of Large Language Models (LLMs) have irrevocably altered the digital computing landscape. Architectures such as GPT-4 \cite{openai2023gpt4}, LLaMA-2 \cite{touvron2023llama2}, and Mistral \cite{jiang2023mistral} have crossed the threshold from academic curiosities to foundational engines driving modern software infrastructures. Because they are pre-trained on terabytes of human linguistic data, these models possess an intrinsic capacity to model complex statistical relationships, mimicking human reasoning processes capable of writing code, drafting legal opinions, and performing advanced medical diagnostic synthesis \cite{thirunavukarasu2023llmsmedicine}.
 
-However, the statistical mechanics that allow these networks to generate flawlessly fluid text also give rise to their most severe structural liability: hallucinations. An LLM operates fundamentally as a next-token predictor; it is not a knowledge database built on a graph of verified truths. When it reaches the boundaries of its parametric memory or encounters contradictory prompts, it does not naturally halt or admit ignorance. Instead, it interpolates. It bridges gaps in knowledge using statistically plausible but entirely fabricated information. The danger of hallucination lies not merely in the inaccuracy itself, but in the unwavering semantic confidence and grammatical perfection with which the lie is delivered. In sensitive operational environments—where decisions impact human life, legal standing, or financial integrity—the presence of invisible hallucinations acts as an absolute barrier to the autonomous deployment of Artificial Intelligence.
+However, the statistical mechanics that allow these networks to generate flawlessly fluid text also give rise to their most severe structural liability: hallucinations \cite{alansari2024survey}. An LLM operates fundamentally as a next-token predictor; it is not a knowledge database built on a graph of verified truths. When it reaches the boundaries of its parametric memory or encounters contradictory prompts, it does not naturally halt or admit ignorance. Instead, it interpolates. It bridges gaps in knowledge using statistically plausible but entirely fabricated information. The danger of hallucination lies not merely in the inaccuracy itself, but in the unwavering semantic confidence and grammatical perfection with which the lie is delivered \cite{sharma2024trust}. In sensitive operational environments---where decisions impact human life, legal standing, or financial integrity---the presence of invisible hallucinations acts as an absolute barrier to the autonomous deployment of Artificial Intelligence \cite{huang2024trustllm}.
 
-Historically, the research community has attempted to diagnose and treat these occurrences through fragmented, post-hoc evaluation strategies. Some researchers have advocated for intense behavioral prompt-engineering, attempting to force the model to ``think step-by-step.'' Others have engineered complex uncertainty sampling mechanisms that force the LLM to generate ten distinct answers to the same question before analyzing the semantic diversity of the outputs. However, as generative models scale into deployment, the necessity for a real-time, computationally efficient, and mathematically integrated safety layer becomes urgent.
+Historically, the research community has attempted to diagnose and treat these occurrences through fragmented, post-hoc evaluation strategies. Some researchers have advocated for intense behavioral prompt-engineering, attempting to force the model to ``think step-by-step'' \cite{wei2022chainofthought}. Others have engineered complex uncertainty sampling mechanisms that force the LLM to generate ten distinct answers to the same question before analyzing the semantic diversity of the outputs \cite{farquhar2024semantic}. However, as generative models scale into deployment, the necessity for a real-time, computationally efficient, and mathematically integrated safety layer becomes increasingly urgent \cite{kang2025uq}.
 
-This capstone project introduces the **TRUEGUARD** (Trustworthy, Unified, Real-time, Explainable Guard) framework. TRUEGUARD is not an external text classifier, nor is it a multi-stage prompt chain. It is an inline analytical matrix designed to wrap over an existing foundation model without modifying its core weights. By extracting deep mathematical signals inherently generated during the LLM's computation, TRUEGUARD detects the onset of a hallucination before it finishes rendering, explains the anomaly to the end-user via interactive UI tokens, and actively mitigates the error via retrieval augmentation.
+This paper introduces the \textbf{TRUEGUARD} (Trustworthy, Unified, Real-time, Explainable Guard) framework. TRUEGUARD is not an external text classifier, nor is it a multi-stage prompt chain. It is an inline analytical matrix designed to wrap over an existing foundation model without modifying its core weights. By extracting deep mathematical signals inherently generated during the LLM's computation, TRUEGUARD detects the onset of a hallucination before it finishes rendering, explains the anomaly to the end-user via interactive UI tokens, and actively mitigates the error via retrieval augmentation.
 
 This paper is structured to define the deep mathematical background of the problem, thoroughly expose the critical gaps in current detection methodologies, fully elaborate on the TRUEGUARD algorithmic design, and benchmark its efficacy against current state-of-the-art architectures.
 
@@ -74,58 +74,49 @@ This paper is structured to define the deep mathematical background of the probl
 \section{Related Works and Problem Formulation}
 \label{sec:related}
 
-The phenomenon of AI hallucination has generated a vast subset of machine learning research. Fundamentally, researchers have categorized these errors into two distinct archetypes:
-\begin{enumerate}
-    \item \textbf{Intrinsic Hallucinations:} The generated text directly contradicts the source material or the user's prompt (e.g., failing to follow a logical constraint provided in the input).
-    \item \textbf{Extrinsic Hallucinations:} The generated text introduces new, fabricated facts that cannot be verified by the prompt or external reality (e.g., inventing a fake historical date).
-\end{enumerate}
+The phenomenon of AI hallucination has generated a vast subset of machine learning research \cite{ji2023survey,maynez2020faithfulness,mckenna2023sources}. Fundamentally, researchers have categorized these errors into two distinct archetypes: \textit{intrinsic hallucinations}, where the generated text directly contradicts the source material or the user's prompt, and \textit{extrinsic hallucinations}, where the generated text introduces new, fabricated facts that cannot be verified by the prompt or external reality \cite{hajji2024map}. This distinction is not merely taxonomic; it carries deep implications for which detection signals are most sensitive to each failure type.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/04_intrinsic_vs_extrinsic.png}
-    \caption{Performance disparity across Intrinsic vs. Extrinsic errors, demonstrating why diverse indicators are required.}
+    \caption{Performance disparity across Intrinsic vs. Extrinsic hallucination types, demonstrating why diverse detection indicators are required for comprehensive coverage.}
 \end{figure}
 
-To combat these, current detection algorithms have historically relied on single-metric approaches. For example, Entropy calculations evaluate the spread of probabilities at the final softmax layer, while Internal State monitoring (such as MIND or PRISM) inspects intermediate neural layers. Despite these efforts, a comprehensive review of the contemporary literature reveals five fundamental structural gaps that currently cripple practical AI safety.
+Early approaches to hallucination mitigation relied heavily on post-hoc fact-checking pipelines and external knowledge graph verification \cite{min2023factscore,guo2022survey}. While effective in controlled settings, these methods introduce significant latency and are inherently disconnected from the generation process itself. More recent work has shifted toward probing the internal representations of transformer models to extract uncertainty signals without requiring additional inference passes. Su et al. \cite{su2024mind} demonstrated that hidden-state anomaly distances correlate strongly with factual errors, while Zhang et al. \cite{zhang2024prism} showed that prompt-guided internal probes can selectively target different hallucination subtypes. Entropy-based methods have also seen significant attention: Ma et al. \cite{ma2024semantic} proposed Semantic Energy, extending classical Shannon entropy with an energy term over raw logits, and Kossen et al. \cite{kossen2024sep} introduced Semantic Entropy Probes as lightweight post-hoc regressors. Moslonka et al. \cite{moslonka2024epr} further refined this direction with token-level Entropy Production Rate, enabling hallucination scoring in black-box settings.
 
-To properly frame these gaps, one must understand that not all hallucinations are born from the same architectural failure. As illustrated in the following sections, a model failing to recall a discrete factual entity behaves profoundly differently on a mathematical level than a model actively contradicting its own pre-established context. The underlying tensor geometries stretch along completely different dimensional axes. This dichotomy is what renders single-metric diagnostic tools entirely insufficient for deployment in unrestricted generative environments.
+Attention-based diagnosis represents a complementary thread of inquiry. Hajji et al. \cite{hajji2024map} traced both intrinsic and extrinsic hallucination signatures through attention patterns, revealing that prompt-context dropout in the attention maps is a reliable precursor to logical contradiction. RAUQ \cite{anon2025rauq} extended this insight by proposing uncertainty-aware attention heads that selectively amplify signals from semantically critical tokens. Despite these advances, the literature reveals a persistent pattern: every proposed method operates within a single signal modality, leaving substantial portions of the hallucination spectrum undetected \cite{zhang2024mhad,sriramanan2024llmcheck}.
+
+Retrieval-Augmented Generation (RAG) \cite{lewis2020retrieval} has emerged as a practical mitigation strategy by grounding model outputs in external document stores. However, existing RAG pipelines are typically applied uniformly to all queries rather than being triggered selectively by inline risk signals \cite{yao2025expandr}. Similarly, calibrated abstention---where the model declines to answer rather than fabricate---has been studied in the context of selective prediction \cite{kadavath2022language}, but has rarely been integrated into a unified detection-and-mitigation loop. TRUEGUARD bridges all of these research threads into a single, coherent inline framework.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/09_signal_coverage_matrix.png}
-    \caption{Signal Coverage Matrix detailing the blind spots of modern hallucination metrics. Our analysis demonstrates the absolute necessity of fusing multiple signals to capture diverse hallucination typologies.}
+    \caption{Signal Coverage Matrix detailing the blind spots of modern hallucination detection metrics. The analysis demonstrates the necessity of fusing multiple signals to capture diverse hallucination typologies.}
 \end{figure}
 
 % =============================================================================
-% III. THE 5 CRITICAL RESEARCH GAPS
+% III. IDENTIFIED RESEARCH GAPS
 % =============================================================================
-\section{The 5 Critical Research Gaps}
+\section{Identified Research Gaps}
 \label{sec:gaps}
 
-Through extensive experimental review and architectural mapping, this capstone project formally establishes that modern AI detection models possess five distinct critical limitations. Exploring how TRUEGUARD resolves these gaps forms the foundation of its system design.
+Through extensive review of the contemporary literature and systematic architectural mapping, five fundamental structural gaps emerge that currently limit the practical deployment of AI safety frameworks. These gaps are not independent; they compound one another, and a solution that addresses only a subset will remain operationally fragile.
 
-\subsection{Gap 1: Disastrous Signal Isolation}
-Traditional detection models fall victim to the trap of Signal Isolation. Entropy-based models (Semantic Energy, EPR) are mathematically excellent at discovering Extrinsic hallucinations (fabricated facts), but they fail catastrophically at spotting Intrinsic hallucinations (logical contradictions). Conversely, Attention-based algorithms (RAUQ, Map of Misbelief) easily spot when a model ignores the prompt, but fail to notice when a model lies about a historical fact. Because no single signal captures the entire spectrum of hallucinations, deploying an isolated detector ensures a massive, dangerous blind spot in the safety matrix.
-
-The severity of this isolation cannot be overstated when transitioning an LLM from a controlled laboratory testing environment into an active, chaotic production workflow. Humans routinely generate highly complex, multi-layered prompts that demand both precise factual retrieval and stringent logical adherence. An attention-only safety net will silently allow the model to fabricate dangerous legal statutes, so long as the grammatical structure of the output appears highly correlated to the input query. Conversely, an entropy-only safety net will confidently permit the model to ignore critical negative constraints, simply because the model is highly certain about the unconstrained topic it has chosen to discuss.
+\textbf{Signal Isolation} constitutes the most pervasive limitation. Traditional detection models fall victim to the trap of operating within a single modality. Entropy-based models such as Semantic Energy \cite{ma2024semantic} and EPR \cite{moslonka2024epr} are mathematically well-suited to discovering extrinsic hallucinations (fabricated facts), but they fail at spotting intrinsic hallucinations (logical contradictions). Conversely, attention-based algorithms such as RAUQ \cite{anon2025rauq} and Map of Misbelief \cite{hajji2024map} reliably detect prompt-attention collapse, but cannot diagnose factual fabrication. Because no single signal captures the full spectrum of hallucinations, deployment of an isolated detector guarantees a dangerous blind spot. In production environments, users routinely submit complex, multi-layered prompts that simultaneously demand precise factual retrieval and stringent logical adherence; a single-signal safety net is incapable of meeting this demand \cite{zhang2024mhad}.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/05_complementarity_gap.png}
-    \caption{The Complementarity Gap: Illustrating how distinct algorithms completely miss inverse hallucination typologies.}
+    \caption{The Complementarity Gap: Illustrating how distinct algorithms completely miss inverse hallucination typologies, motivating the need for multi-signal fusion.}
 \end{figure}
 
-\subsection{Gap 2: Severe Computational Latency (The Overhead Constraint)}
-In production environments, inference speed is arguably more critical than minor accuracy bumps. The current gold-standard for detection—Semantic Entropy—mandates that an LLM generate between 5 and 10 separate responses to calculate output variance. This multiplies the computational and financial cost of the generation by $10\times$. For real-time applications serving thousands of queries, this catastrophic latency overhead is structurally untenable.
+\textbf{Computational Overhead} represents the second critical barrier. In production environments, inference speed is arguably more critical than minor accuracy improvements. The current gold-standard for detection---Semantic Entropy \cite{farquhar2024semantic}---mandates that an LLM generate between five and ten separate responses to calculate output variance, multiplying the computational and financial cost by up to $10\times$. For real-time applications serving thousands of concurrent queries, this catastrophic latency overhead is structurally untenable. Internal state probing methods, while more efficient, still require additional forward passes over selected layers \cite{su2024mind,zhang2024prism}. There is a clear need for a detection mechanism that derives its signals from the single, unavoidable inference pass already being executed.
 
-\subsection{Gap 3: The Detection-Mitigation Disconnect}
-Nearly all existing architectures operate as passive alarms. If they detect a hallucination, they merely flag the resulting text post-generation. They do not intercept the generation process natively, nor do they possess a mechanism to repair the output dynamically. The complete disconnect between discovering an error and actively mitigating the error forces developers to build highly unstable external fallback scripts, leaving the system fragmented.
+\textbf{The Detection-Mitigation Disconnect} is a structural gap that pervades nearly all existing architectures. Most systems operate as passive alarms: if they detect a hallucination, they merely flag the resulting text after it has been generated and delivered to the user. They do not intercept the generation process natively, nor do they possess a mechanism to repair the output dynamically \cite{wu2025behcal}. The complete disconnect between discovering an error and actively mitigating it forces practitioners to construct external fallback scripts and post-processing pipelines, leaving the system fragmented and the user exposed during the interval between detection and correction.
 
-\subsection{Gap 4: The Explainability Deficit (XAI Gap)}
-A detection algorithm outputting an AUROC metric of 0.90 is useless if the human end-user cannot understand what the number implies. Modern detectors output raw decimal "Risk Scores" (e.g., "Confidence: 0.34") without providing verifiable, human-readable justification outlining exactly \textit{why} the AI flagged the text. This black-box opacity damages operator trust and prevents human-in-the-loop oversight.
+\textbf{The Explainability Deficit} represents the fourth gap, manifesting at the interface between the system and its human operators. A detection algorithm achieving an AUROC of 0.90 is operationally useless if the human end-user cannot understand what the score implies \cite{herrera2025xai}. Modern detectors output raw decimal risk scores (e.g., ``Confidence: 0.34'') without providing verifiable, human-readable justification outlining exactly \textit{why} the AI flagged the text. This black-box opacity damages operator trust, prevents meaningful human-in-the-loop oversight, and violates emerging regulatory expectations for AI transparency \cite{huang2024trustllm,gunning2019darpa}.
 
-\subsection{Gap 5: The Trust Calibration Failure}
-Human psychology dictates that users will often blindly trust complex technical systems, even when they are incorrect. Empirical human-computer interaction studies have recently proven that providing detailed technical explanations for AI outputs often causes humans to falsely trust hallucinations. Merely printing a detection score is not enough; the UI layer must visually and psychologically calibrate the user to appropriately distrust potentially fabricated data through strict contrastive UI formatting.
+\textbf{Trust Calibration Failure} is the fifth gap and operates at a subtler psychological level. Human-computer interaction studies have demonstrated that providing technical explanations for AI outputs can paradoxically cause users to over-trust hallucinated content when the explanation is opaque or written in unfamiliar notation \cite{sharma2024trust}. Merely printing a detection score is insufficient; the user interface layer must visually and psychologically calibrate operators to appropriately distrust potentially fabricated data through contrastive formatting and actionable visual cues. Without deliberate trust calibration design, even a high-performing detection engine can fail at the point of human interpretation.
 
 % =============================================================================
 % IV. THE TRUEGUARD FRAMEWORK ARCHITECTURE
@@ -133,71 +124,66 @@ Human psychology dictates that users will often blindly trust complex technical 
 \section{The TRUEGUARD Framework Architecture}
 \label{sec:trueguard}
 
-To systematically dismantle the five gaps identified in the literature, we constructed TRUEGUARD as a holistic, multi-layered inline mechanism. The system is engineered to capture complex mathematical anomalies without generating external API calls or multi-sample passes. TRUEGUARD operates strictly on the active computational graph of the primary inference pass, achieving a mathematically robust, un-intrusive safety layer broken into four distinct macro-modules.
+To systematically address the five gaps identified in the preceding analysis, TRUEGUARD is constructed as a holistic, multi-layered inline mechanism. The system is engineered to capture complex mathematical anomalies without generating external API calls or multi-sample passes. TRUEGUARD operates strictly on the active computational graph of the primary inference pass, achieving a mathematically robust, non-intrusive safety layer organized into four distinct modules.
 
-It accomplishes this by hijacking the standard forward-pass hooks available in most modern transformer architectures. Rather than allowing the intermediate tensor states and attention matrices to be discarded from VRAM after a token is generated, TRUEGUARD retains these specific slices, streaming them silently into our localized, lightweight diagnostic classifiers operating asynchronously to the main text generation thread. This parallelized interception ensures the LLM's primary matrix multiplications are entirely unimpeded, delivering the required security without violating latency Service Level Agreements (SLAs).
+It accomplishes this by instrumenting the standard forward-pass hooks available in most modern transformer architectures. Rather than allowing intermediate tensor states and attention matrices to be discarded from VRAM after each token is generated, TRUEGUARD retains these specific slices and streams them into localized lightweight diagnostic classifiers operating asynchronously to the main text generation thread. This parallelized interception ensures the primary matrix multiplications are entirely unimpeded, delivering the required security without violating latency service-level agreements.
 
-\subsection{Module 1: The Multi-Signal Extraction Engine}
+\subsection{Multi-Signal Extraction Engine}
 
-TRUEGUARD resolves the \textbf{Signal Isolation} gap by extracting four inherently diverse mathematical signals dynamically. Because these values are already computed by the LLM during generation, TRUEGUARD extracts them simultaneously with $O(1)$ overhead penalty.
+TRUEGUARD resolves the signal isolation gap by extracting four inherently diverse mathematical signals dynamically from the single inference pass. Because these values are already computed by the LLM during generation, TRUEGUARD extracts them simultaneously with $O(1)$ overhead penalty relative to the baseline generation cost \cite{su2024mind,kossen2024sep}.
 
-\begin{enumerate}
-    \item \textbf{Internal State Probes (ISP):} As tokens pass through the deep dense layers of the transformer, TRUEGUARD calculates the $L2$ distance of the active hidden vector $h_{l}^{(t)}$ against moving truth centroids derived during calibration.
+\textbf{Internal State Probes (ISP)} are derived from the deep dense layers of the transformer. As tokens pass through successive layers, TRUEGUARD computes the $L2$ distance of the active hidden vector $h_{l}^{(t)}$ against moving truth centroids established during a calibration phase on verified factual corpora.
     \begin{equation}
         ISP(t) = \frac{||h_{l}^{(t)} - \mu_{truth}||_{2}}{\sigma_{truth}}
     \end{equation}
-    Spikes in the ISP value strongly correlate with representation-level anomalies indicating the model is fabricating internal logic.
+    Spikes in the ISP value strongly correlate with representation-level anomalies, indicating that the model is constructing internal logic that deviates from its verified knowledge manifold.
 
-    \item \textbf{Attention Anomaly Score (AAS):} To counteract Intrinsic hallucinations, TRUEGUARD monitors the sum of the self-attention weights $\alpha_{ij}$ connecting the newly generated token back to the user's origin prompt. 
+\textbf{Attention Anomaly Score (AAS)} is computed to counteract intrinsic hallucinations. TRUEGUARD monitors the sum of the self-attention weights $\alpha_{ij}$ connecting the newly generated token back to the user's origin prompt.
     \begin{equation}
-        AAS(t) = 1 - \sum_{j \in Prompt} \alpha_{ij}^{(L)}
+        AAS(t) = 1 - \sum_{j \in \text{Prompt}} \alpha_{ij}^{(L)}
     \end{equation}
-    When the LLM hallucinates, it physically "stops looking" at the context. This formula flags steep drops in context adherence.
+    When the model hallucinates, it effectively ceases to attend to the input context. Steep drops in this attention mass directly flag the onset of logical contradiction \cite{hajji2024map,anon2025rauq}.
 
-    \item \textbf{Entropy-Energy Monitor (EEM):} Examining the raw logits $z_k$ prior to softmax standardization, TRUEGUARD measures sharp probability flattening indicative of raw generative uncertainty (Extrinsic hallucination).
+\textbf{Entropy-Energy Monitor (EEM)} examines the raw logits $z_k$ prior to softmax normalization, measuring sharp probability flattening indicative of generative uncertainty characteristic of extrinsic hallucination \cite{ma2024semantic,anon2025entropy}.
     \begin{equation}
         EEM(t) = - \sum_{k} p(z_k) \log p(z_k) + \tau \sum e^{z_k}
     \end{equation}
 
-    \item \textbf{Distribution Shift Tracker (DST):} TRUEGUARD calculates the Kullback-Leibler (KL) Divergence across sliding temporal windows, isolating moments where the generation drifts violently away from verified conceptual spaces over longer generation spans.
-\end{enumerate}
+\textbf{Distribution Shift Tracker (DST)} calculates Kullback-Leibler divergence across sliding temporal windows, isolating moments where generation drifts violently away from verified conceptual spaces over longer spans---a phenomenon closely related to cumulative confabulation \cite{dasgupta2024hallushift,nath2024hallushift}.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/10_signal_traces_simulation.png}
-    \caption{Real-time TRUEGUARD simulation matrix. This Token-Level Signal Trace visualizes the exact moment internal mechanisms detach from safety boundaries across all four distinct mathematical metrics.}
+    \caption{Real-time TRUEGUARD simulation matrix. This token-level signal trace visualizes the exact moment internal mechanisms detach from safety boundaries across all four distinct mathematical signals.}
 \end{figure}
 
-\subsection{Module 2: Learned Multi-Signal Fusion}
+\subsection{Adaptive Fusion Gateway}
 
-Summing these four signals averagely creates unweighted bias. Thus, to defeat the \textbf{Computational Latency} gap, TRUEGUARD passes the normalized $4D$ vector array through an ultra-lightweight Multi-Layer Perceptron (MLP) mapping layer trained specifically to judge signal priority based on prompt complexity.
+Summing the four signals with uniform weights introduces modality bias. To address this without incurring additional computational cost, TRUEGUARD passes the normalized four-dimensional feature vector through an ultra-lightweight Multi-Layer Perceptron fusion layer trained specifically to judge signal priority based on prompt complexity and task type \cite{kossen2024sep,sriramanan2024llmcheck}.
 
 \begin{equation}
-    R_{Final}(t) = \sigma \left( W_{fusion} \cdot [ISP(t) \oplus AAS(t) \oplus EEM(t) \oplus DST(t)] + b \right)
+    R_{\text{Final}}(t) = \sigma \left( W_{\text{fusion}} \cdot [ISP(t) \oplus AAS(t) \oplus EEM(t) \oplus DST(t)] + b \right)
 \end{equation}
 
-This allows TRUEGUARD to aggressively weigh Attention mechanisms for summarization tasks, while shifting weight towards Entropy mechanisms for historical fact-recall tasks, executing within $10$ milliseconds.
+This allows TRUEGUARD to aggressively weight attention mechanisms for summarization tasks, while shifting weight towards entropy mechanisms for historical fact-recall tasks, executing the full fusion operation within approximately ten milliseconds. Because the weights are learned rather than hand-tuned, the gateway generalizes across model families and prompt distributions without manual reconfiguration.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/08_mitigation_factual_acc.png}
-    \caption{Adaptive learned signal fusion ensures the TRUEGUARD mitigation loops actively protect factual accuracy without distorting non-factual conversational abilities.}
+    \caption{Adaptive learned signal fusion ensures that TRUEGUARD's mitigation loops actively protect factual accuracy without distorting non-factual conversational abilities.}
 \end{figure}
 
-\subsection{Module 3: Human-Centered Explainability Mapping}
+\subsection{Human-Centered Explainability and Trust Layer}
 
-To destroy the \textbf{Explainability Deficit} and the \textbf{Trust Calibration} gaps, TRUEGUARD refuses to output raw arrays. The framework translates the $R_{Final}(t)$ array into native word-level visualizations. 
-Tokens mapping below $0.3$ risk are marked distinctly as "Verified". Tokens generating a risk above $0.6$ are immediately restricted, flagged in deep red, and presented with a contrastive hover-card displaying exactly which of the 4 sub-signals caused the alarm—empowering non-technical users to calibrate their trust dynamically.
+To address the explainability deficit and trust calibration failure simultaneously, TRUEGUARD refuses to expose raw numerical arrays to end-users. The framework translates the $R_{\text{Final}}(t)$ scores into native word-level visual annotations within the response interface \cite{herrera2025xai,gunning2019darpa}. Tokens whose risk score falls below $0.3$ are marked as ``Verified'' and presented with a neutral visual indicator. Tokens generating a risk above $0.6$ are immediately restricted, highlighted in a distinct warning color, and accompanied by a contrastive hover-card displaying exactly which of the four sub-signals triggered the alarm---empowering non-technical operators to calibrate their trust dynamically without interpreting raw probability values \cite{sharma2024trust}. This design directly fulfills the dual mandate of XAI research: not merely detecting anomalies, but communicating them in a form that supports informed human judgment \cite{herrera2025xai}.
 
-\subsection{Module 4: Closed-Loop Active Mitigation}
+\subsection{Verification Waterfall and Closed-Loop Mitigation}
 
-TRUEGUARD answers the \textbf{Detection-Mitigation Disconnect} through the Verification Waterfall pipeline. If the sequence risk surpasses the fail-safe threshold, the output is halted.
-\textbf{Stage 1:} The flagged fabricated claim is extracted and fed into a Retrieval-Augmented Grounding (RAG) vector database. If a factual replacement is found, TRUEGUARD overwrites the hallucination inline.
-\textbf{Stage 2:} If RAG fails, TRUEGUARD executes Calibrated Abstinence, swapping the hallucinated paragraph with an honest programmatic fallback ("I do not possess verifiable data regarding this claim").
+TRUEGUARD resolves the detection-mitigation disconnect through the Verification Waterfall pipeline. When the cumulative sequence risk surpasses the configured fail-safe threshold, the output stream is halted and the following staged recovery process is invoked. In the first stage, the flagged segment is extracted and submitted to a Retrieval-Augmented Grounding (RAG) vector database \cite{lewis2020retrieval,yao2025expandr}; if a factual replacement is found, TRUEGUARD overwrites the hallucination inline and resumes generation. In the second stage, if RAG retrieval fails to surface a verified replacement, TRUEGUARD executes Calibrated Abstention---replacing the hallucinated passage with an honest programmatic fallback statement, consistent with the selective prediction paradigm studied in \cite{kadavath2022language,wu2025behcal}.
 
 \begin{table}[!htbp]
 \centering
-\caption{Waterfall Mitigation Efficacy: Hallucination Suppression Rates}
+\caption{Waterfall Mitigation Efficacy: Hallucination Suppression Rates Across Model Variants}
 \label{tab:mitigation}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{1.0\textwidth}{X c c c c}
@@ -214,12 +200,12 @@ Mistral Instruct & 15.5\% & 8.2\% & 5.1\% & \textbf{-67.1\%} \\
 \end{tabularx}
 \end{table}
 
-Table \ref{tab:mitigation} quantifies the exact power of the closed-loop verification waterfall. Instead of merely alerting users, the dynamic interception immediately drops the global hallucination presence from nearly 20\% down to 7.2\%. Grounding the response using RAG eliminates the majority of Extrinsic errors, while Calibrated Abstention decisively shuts down Intrinsic logical loops that cannot be retrieved, ensuring the output stream remains sterile and highly factual.
+Table~\ref{tab:mitigation} quantifies the staged power of the closed-loop verification waterfall. Rather than merely alerting users, the dynamic interception drops the global hallucination rate from nearly 20\% down to 7.2\%. Grounding the response using RAG eliminates the majority of extrinsic errors, while Calibrated Abstention decisively halts intrinsic logical loops that cannot be retrieved, ensuring the output stream remains factually sterile.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/07_mitigation_hallu_rate.png}
-    \caption{The Waterfall Mitigation Pipeline in action. The graph demonstrates TRUEGUARD forcefully dropping generated hallucination rates at each active interception step natively.}
+    \caption{The Verification Waterfall Pipeline in action. The figure demonstrates TRUEGUARD progressively suppressing generated hallucination rates at each active interception stage.}
 \end{figure}
 
 % =============================================================================
@@ -228,20 +214,21 @@ Table \ref{tab:mitigation} quantifies the exact power of the closed-loop verific
 \section{Experimental Results and Discussion}
 \label{sec:results}
 
-In order to scientifically validate TRUEGUARD, the framework was attached locally to open-source models (LLaMA-2-7B and Mistral-7B) using hardware constraints mirroring real-world deployment parameters (Single NVIDIA T4 GPU). The architecture was benched against the HaluEval and TruthfulQA datasets.
+To scientifically validate TRUEGUARD, the framework was attached to open-source models (LLaMA-2-7B \cite{touvron2023llama2} and Mistral-7B \cite{jiang2023mistral}) under hardware constraints mirroring real-world deployment parameters (single NVIDIA T4 GPU). The architecture was evaluated against the HaluEval \cite{li2023halueval} and TruthfulQA \cite{lin2021truthfulqa} benchmarks, with additional subsets from SQuAD-Shift and CoQA-Adversarial to probe distribution robustness.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=1.0\textwidth]{TRUEGUARD_Capstone_Plots/00_combined_summary_4panel.png}
-    \caption{Executive Summary Panel representing the aggregated performance of the TRUEGUARD architecture across multiple vectors of research superiority.}
+    \caption{Executive Summary Panel representing the aggregated performance of the TRUEGUARD architecture across multiple evaluation dimensions.}
 \end{figure}
 
 \subsection{Detection Precision and AUROC Superiority}
-Evaluating exact classification parameters, TRUEGUARD achieved an aggregated 0.844 AUROC across extensive validation sets. Compared to strictly single-signal baselines which hover around $0.75$, TRUEGUARD establishes a massive leap in boundary detection. 
+
+Evaluating classification performance, TRUEGUARD achieved an aggregated 0.844 AUROC across the full validation suite. Compared to strictly single-signal baselines that hover around 0.73--0.76 on average, TRUEGUARD establishes a substantial improvement in boundary detection across all dataset types.
 
 \begin{table}[!htbp]
 \centering
-\caption{Comparative AUROC Performance across Major Baseline Detectors}
+\caption{Comparative AUROC Performance: TRUEGUARD vs. Single-Signal Baseline Detectors}
 \label{tab:auroc}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{1.0\textwidth}{X c c c c}
@@ -259,39 +246,39 @@ CoQA-Adversarial & 0.710 & 0.655 & 0.790 & \textbf{0.785} \\
 \end{tabularx}
 \end{table}
 
-The empirical values presented in Table \ref{tab:auroc} unequivocally demonstrate the catastrophic failure of isolated signals when shifted out of their preferred domain. Semantic Entropy collapses during Dialogue reasoning (0.642) while Attention collapses during factual QA (0.612). TRUEGUARD's learned fusion matrix actively routes the classification weights, securing dominant predictive power universally. The system proved that fusing Internal State metrics dynamically with Attention scoring allows a unified model to capture nearly 95\% of both intrinsic and extrinsic data anomalies without failing on edge-cases.
+The values in Table~\ref{tab:auroc} demonstrate the domain-dependent failure of isolated signals. Semantic Entropy collapses during dialogue reasoning (0.642) while the Attention signal collapses during factual QA (0.612). TRUEGUARD's learned fusion matrix actively re-routes classification weight, securing dominant predictive power across all five benchmark types. The system demonstrates that fusing Internal State metrics dynamically with Attention scoring captures nearly 95\% of both intrinsic and extrinsic anomalies without degrading on edge cases.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/01_avg_auroc_comparison.png}
-    \caption{Grouped Bar representing AUROC scores across standard evaluation benchmarks. TRUEGUARD consistently outperforms isolated signal competitors.}
+    \caption{Grouped bar representation of AUROC scores across standard evaluation benchmarks. TRUEGUARD consistently outperforms isolated signal competitors across all tested conditions.}
 \end{figure}
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/02_auroc_heatmap.png}
-    \caption{AUROC Heatmap detailing signal strength across individual dataset challenges.}
+    \caption{AUROC Heatmap detailing individual signal strength across the full suite of benchmark challenges, visualizing the complementarity of the four detection signals.}
 \end{figure}
 
-The heatmap array presented above isolates the independent performance of each individual signal track against specifically curated subsets of the HaluEval database. It clearly visualizes that no single tracker remains dominant across every category. The Entropy-Energy Monitor (EEM) burns brightly when confronting QA fact-fabrication, yet fades significantly during dialogue-based logical reasoning tasks where the Attention Anomaly Score (AAS) begins to heavily dominate the classification boundary. This directly proves the fundamental thesis of the TRUEGUARD architecture: a dynamic, multi-modal net is the only statistically viable method for capturing the full spectrum of generative failure.
+The heatmap isolates the independent performance of each signal track against curated subsets of the HaluEval benchmark. It clearly visualizes that no single tracker remains dominant across every category. The Entropy-Energy Monitor excels at confronting QA fact-fabrication, yet fades appreciably during dialogue-based logical reasoning tasks where the Attention Anomaly Score begins to dominate the classification boundary. This directly validates the foundational thesis of the TRUEGUARD architecture: a dynamic, multi-modal detection network is the only statistically viable approach for comprehensively capturing generative failure.
 
-\subsection{Ablation Analysis and Structural Importance}
-To confirm the absolute necessity of all four pillars, a rigorous ablation study was performed. Removing the Internal State Probes dramatically crippled the model's ability to navigate prompt-injection attacks. Removing the Attention Anomaly scores destroyed its ability to monitor long-context reasoning. The resulting F1 distributions clearly validate that LLM hallucination is a multi-modal mathematical failure, requiring a multi-modal mathematical net.
+\subsection{Ablation Analysis and Structural Signal Importance}
+
+To confirm the necessity of all four pillars, a rigorous ablation study was conducted. Removing Internal State Probes substantially degraded the model's ability to navigate prompt-injection attacks. Removing Attention Anomaly scoring destroyed its ability to monitor long-context reasoning consistency. The resulting F1 distributions validate that LLM hallucination is a multi-modal mathematical phenomenon, requiring an equally multi-modal detection net.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/03_ablation_study.png}
-    \caption{Ablation Study demonstrating the severe performance degradation accompanying the removal of any of the 4-signal fusion parameters.}
+    \caption{Ablation Study demonstrating severe performance degradation when any one of the four signal fusion components is removed, confirming the necessity of all four channels.}
 \end{figure}
 
 \subsection{Computational Efficiency and Real-Time Viability}
-Perhaps the most crucial triumph for deployment viability is the system's operational hardware profile. Because TRUEGUARD intercepts data matrices existing purely on the active forward pass, it requires precisely ZERO additional token inferences.
 
-Empirical testing confirmed TRUEGUARD imposes an overhead latency drag of just 12.4 milliseconds per token. Compared to the previous gold-standard—Multi-Sample Semantic Entropy—which required an average of $142$ ms/token drag, TRUEGUARD is mathematically proven to be $11.5\times$ faster.
+The most crucial result for deployment viability is the system's operational hardware profile. Because TRUEGUARD intercepts data matrices existing purely on the active forward pass, it requires zero additional token inferences. Empirical testing confirmed a 12.4 ms overhead per token. Compared to Multi-Sample Semantic Entropy, which required an average of 142 ms/token, TRUEGUARD is $11.5\times$ faster in practice.
 
 \begin{table}[!htbp]
 \centering
-\caption{Computational Efficiency and Latency Overhead per Token}
+\caption{Computational Efficiency and Latency Overhead Per Token Across Defense Frameworks}
 \label{tab:latency}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{1.0\textwidth}{X c c c c}
@@ -309,22 +296,23 @@ Semantic Entropy (N=10) & 10 & +4.5 GB & 280.1 ms & 9.8x \\
 \end{tabularx}
 \end{table}
 
-As detailed in Table \ref{tab:latency}, operating a defense mechanism that requires $N$-samples inherently scales processing time linearly, destroying application responsiveness. By executing purely linear algebra operations simultaneously on the baseline forward pass, TRUEGUARD adds merely 12.4 ms/token ($40.9$ ms total) overhead. This proves that high-fidelity security does not mandate a sacrifice in operational velocity, allowing seamless integration into live chatbots. This bridges the final gap preventing live conversational integration.
+As detailed in Table~\ref{tab:latency}, operating a defense mechanism that requires $N$-sample passes scales processing time linearly, destroying application responsiveness. By executing purely linear-algebraic operations simultaneously on the baseline forward pass, TRUEGUARD adds merely 40.9 ms total overhead while delivering four-signal fusion coverage. This proves that high-fidelity safety does not mandate a sacrifice in operational velocity, enabling seamless integration into live conversational applications.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/06_efficiency_tradeoff.png}
-    \caption{Latency vs. AUROC efficiency tradeoff showing TRUEGUARD securely preserving high-velocity model bounds without compromising classification capability.}
+    \caption{Latency vs.\ AUROC efficiency tradeoff, showing TRUEGUARD securing high-velocity generative bounds without compromising classification capability.}
 \end{figure}
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{TRUEGUARD_Capstone_Plots/11_time_overhead.png}
-    \caption{Token Generation Overhead times mapping the computational drag imposed by various defense pipelines.}
+    \caption{Token generation overhead times mapping the computational drag imposed by various defense pipelines across hardware platforms.}
 \end{figure}
 
 \subsection{Ethical Considerations and Limitations}
-While TRUEGUARD significantly mitigates overt factual hallucinations and logical contradictions, it is imperative to acknowledge that no inline tracking mechanism can currently achieve 100\% verifiable truth mapping, particularly in low-resource or underrepresented linguistic domains where reference embeddings are scarce. Furthermore, the aggressive nature of the Calibrated Abstention module may inadvertently silence the LLM on subjective, philosophical, or culturally nuanced queries if the confidence thresholds are too strictly tuned. Future deployments must pair these quantitative AUROC optimizations with rigorous, qualitative fairness evaluations to prevent the suppression of valid minority perspectives.
+
+While TRUEGUARD significantly mitigates overt factual hallucinations and logical contradictions, no inline tracking mechanism can currently achieve 100\% verifiable truth mapping, particularly in low-resource or underrepresented linguistic domains where reference embeddings are scarce \cite{bang2023multitask}. Furthermore, the aggressive nature of the Calibrated Abstention module may inadvertently silence the model on subjective, philosophical, or culturally nuanced queries if confidence thresholds are too strictly tuned. Future deployments must pair these quantitative AUROC optimizations with rigorous qualitative fairness evaluations to prevent the suppression of valid minority perspectives \cite{huang2024trustllm}.
 
 % =============================================================================
 % VI. CONCLUSION
@@ -332,21 +320,19 @@ While TRUEGUARD significantly mitigates overt factual hallucinations and logical
 \section{Conclusion}
 \label{sec:conclusion}
 
-The mitigation of Large Language Model hallucinations is not a problem that can be definitively solved by expanding dataset sizes or relying on post-generation classifiers. Hallucination is an intrinsic mathematical trait of autoregressive generation architecture, requiring a comprehensive, inline mathematical tracking matrix to police the boundaries of valid logic.
+The mitigation of Large Language Model hallucinations is not a problem that can be resolved by expanding dataset sizes or relying on post-generation classifiers. Hallucination is an intrinsic mathematical trait of autoregressive generation, requiring a comprehensive, inline mathematical tracking matrix to police the boundaries of valid logic.
 
-Through systematic literature review, this research isolated five critical missing paradigms across current AI safety vectors—signal isolation, severe computational overhead, lack of mitigation loops, disastrous explainability, and failure of trust calibration. 
+Through systematic literature review, this research isolated five critical structural gaps across current AI safety approaches---signal isolation, severe computational overhead, the detection-mitigation disconnect, the explainability deficit, and trust calibration failure. The TRUEGUARD framework was designed explicitly to address all five gaps within a single architecture. By routing Internal State Probes, Attention Anomaly scores, Entropy-Energy measurements, and Distribution shift metrics through a learned adaptive fusion gateway, TRUEGUARD achieves 0.844 AUROC detection performance. By executing this entire analytical pipeline inside the generation process, the system delivers an $11.5\times$ latency advantage over competitive N-sample strategies, rendering it viable for immediate production deployment. Finally, by connecting risk scores to active RAG mitigation loops and visual trust-calibrated token annotations, TRUEGUARD bridges the gap between raw statistical risk and verifiable human trust.
 
-The TRUEGUARD capstone framework was designed and implemented explicitly to dismantle these barriers. By successfully routing Internal State Probes, Attention Anomaly algorithms, Entropy measurements, and Distribution kl-shifts into a single learned fusion operation, TRUEGUARD establishes highly secure AUROC detection bounds (0.844). More impressively, executing this entire mathematical array directly inside the generation matrix allows the system to achieve an $11.5\times$ latency advantage over competitive strategies, rendering it viable for immediate production deployment. Finally, by connecting these indicators physically to active RAG mitigation loops and visual contrastive UI token flagging, TRUEGUARD bridges the gap between raw statistical risk and verifiable human trust. 
-
-Future iterations of the TRUEGUARD framework will focus on porting this unified logic array into massive Multimodal Vision-Language integrations, establishing a foundational footprint for the next generation of Trustworthy AI architecture.
+Future iterations will focus on porting this unified detection framework into multimodal vision-language integrations, establishing a foundational footprint for the next generation of trustworthy AI architectures.
 
 \section*{Code and Data Availability}
-The Python Proof-of-Concept (PoC) inference architecture, the specialized transformer extraction hooks utilized for the baseline evaluations, and the localized RAG database generation scripts are intended to be open-sourced following the formal conclusion of the capstone defense to assist the broader community in real-time hallucination mitigation.
+The Python Proof-of-Concept inference architecture, the transformer extraction hooks utilized for baseline evaluations, and the RAG database generation scripts are intended to be open-sourced following the formal conclusion of the capstone defense to assist the broader community in real-time hallucination mitigation.
 
 \section*{Acknowledgements}
-The authors wish to express their profound gratitude to the Department of Computer Science and Engineering at Vellore Institute of Technology (VIT), Chennai, for providing the foundational academic environment, architectural guidance, and continuous support that made this research possible.
+The authors wish to express their gratitude to the Department of Computer Science and Engineering at Vellore Institute of Technology (VIT), Chennai, for providing the foundational academic environment, architectural guidance, and continuous support that made this research possible.
 
-\begin{thebibliography}{20}
+\begin{thebibliography}{40}
 
 \bibitem{su2024mind}
 W. Su, C. Wang, Q. Ai, Y. Hu, Z. Wu, Y. Zhou, and Y. Liu,
@@ -445,6 +431,96 @@ MIT Lincoln Laboratory, 2024.
 S. Yao, P. Huang, Z. Liu, Y. Gu, Y. Yan, S. Yu, and G. Yu,
 ``ExpandR: Teaching dense retrievers beyond queries with LLM guidance,''
 in \textit{Proc. EMNLP 2025}, pp. 19036--19054, 2025.
+
+\bibitem{farquhar2024semantic}
+S. Farquhar, J. Kossen, L. Kuhn, and Y. Gal,
+``Detecting hallucinations in large language models using semantic consistency,''
+\textit{Nature}, vol. 630, pp. 625--630, 2024.
+
+\bibitem{openai2023gpt4}
+OpenAI,
+``GPT-4 technical report,''
+arXiv preprint arXiv:2303.08774, 2023.
+
+\bibitem{touvron2023llama2}
+H. Touvron, L. Martin, K. Stone et al.,
+``Llama 2: Open foundation and fine-tuned chat models,''
+arXiv preprint arXiv:2307.09288, 2023.
+
+\bibitem{jiang2023mistral}
+A. Q. Jiang, A. Sablayrolles, A. Mensch et al.,
+``Mistral 7B,''
+arXiv preprint arXiv:2310.06825, 2023.
+
+\bibitem{ji2023survey}
+Z. Ji, N. Lee, R. Frieske, T. Yu, D. Su, Y. Xu, E. Ishii, Y. J. Bang, A. Madotto, and P. Fung,
+``Survey of hallucination in natural language generation,''
+\textit{ACM Computing Surveys}, vol. 55, no. 12, pp. 1--38, 2023.
+
+\bibitem{maynez2020faithfulness}
+J. Maynez, S. Narayan, B. Bohnet, and R. McDonald,
+``On faithfulness and factuality in abstractive summarization,''
+in \textit{Proc. ACL}, pp. 1906--1919, 2020.
+
+\bibitem{mckenna2023sources}
+N. McKenna, T. Li, L. Cheng, M. S. Hosseini, M. Johnson, and M. Steedman,
+``Sources of hallucination by large language models on inference tasks,''
+in \textit{Findings EMNLP}, 2023.
+
+\bibitem{lewis2020retrieval}
+P. Lewis, E. Perez, A. Piktus et al.,
+``Retrieval-augmented generation for knowledge-intensive NLP tasks,''
+in \textit{Proc. NeurIPS}, vol. 33, pp. 9459--9474, 2020.
+
+\bibitem{min2023factscore}
+S. Min, K. Krishna, X. Lyu et al.,
+``FActScore: Fine-grained atomic evaluation of factual precision in long form text generation,''
+in \textit{Proc. EMNLP}, pp. 12076--12100, 2023.
+
+\bibitem{guo2022survey}
+Z. Guo, M. Schlichtkrull, and A. Vlachos,
+``A survey on automated fact-checking,''
+\textit{Trans. Assoc. Comput. Linguistics}, vol. 10, pp. 178--206, 2022.
+
+\bibitem{wei2022chainofthought}
+J. Wei, X. Wang, D. Schuurmans et al.,
+``Chain-of-thought prompting elicits reasoning in large language models,''
+in \textit{Proc. NeurIPS}, vol. 35, pp. 24824--24837, 2022.
+
+\bibitem{kadavath2022language}
+S. Kadavath, T. Conerly, A. Askell et al.,
+``Language models (mostly) know what they know,''
+arXiv preprint arXiv:2207.05221, 2022.
+
+\bibitem{li2023halueval}
+J. Li, X. Cheng, W. X. Zhao, J.-Y. Nie, and J.-R. Wen,
+``HaluEval: A large-scale hallucination evaluation benchmark for large language models,''
+in \textit{Proc. EMNLP}, pp. 6449--6464, 2023.
+
+\bibitem{lin2021truthfulqa}
+S. Lin, J. Hilton, and O. Evans,
+``TruthfulQA: Measuring how models mimic human falsehoods,''
+in \textit{Proc. ACL}, pp. 3214--3252, 2022.
+
+\bibitem{thirunavukarasu2023llmsmedicine}
+A. J. Thirunavukarasu, D. S. J. Ting, K. Elangovan, L. Gutierrez, T. F. Tan, and D. S. W. Ting,
+``Large language models in medicine,''
+\textit{Nature Medicine}, vol. 29, no. 8, pp. 1930--1940, 2023.
+
+\bibitem{gunning2019darpa}
+D. Gunning and D. Aha,
+``DARPA's explainable artificial intelligence (XAI) program,''
+\textit{AI Magazine}, vol. 40, no. 2, pp. 44--58, 2019.
+
+\bibitem{bang2023multitask}
+Y. Bang, S. Cahyawijaya, N. Lee et al.,
+``A multitask, multilingual, multimodal evaluation of ChatGPT on reasoning, hallucination, and interactivity,''
+in \textit{Proc. AACL}, pp. 675--718, 2023.
+
+\bibitem{manakul2023selfcheckgpt}
+P. Manakul, A. Liusie, and M. J. F. Gales,
+``SelfCheckGPT: Zero-resource black-box hallucination detection for generative large language models,''
+in \textit{Proc. EMNLP}, pp. 9004--9017, 2023.
 
 \end{thebibliography}
 
